@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd">
+
+	<!-- 业务数据事物控制 -->
+	<bean id="transactionManager-client"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="datasource-client" />
+	</bean>
+
+	<tx:advice id="txAdvice-client" transaction-manager="transactionManager-client">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="insert*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="save*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="delete*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="remove*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="drop*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="update*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="modify*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="get*" propagation="REQUIRED" read-only="true"
+				isolation="DEFAULT" />
+			<tx:method name="find*" propagation="REQUIRED" read-only="true"
+				isolation="DEFAULT" />
+			<tx:method name="select*" propagation="REQUIRED" read-only="true"
+				isolation="DEFAULT" />
+			<!-- <tx:method name="*" read-only="true"/> -->
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- 用户数据事物控制 -->
+	<bean id="transactionManager-sys"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="datasource-sys" />
+	</bean>
+
+	<tx:advice id="txAdvice-sys" transaction-manager="transactionManager-sys">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="insert*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="save*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="delete*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="remove*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="drop*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="update*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="modify*" propagation="REQUIRED" isolation="DEFAULT" />
+			<tx:method name="get*" propagation="REQUIRED" read-only="true"
+				isolation="DEFAULT" />
+			<tx:method name="find*" propagation="REQUIRED" read-only="true"
+				isolation="DEFAULT" />
+			<tx:method name="select*" propagation="REQUIRED" read-only="true"
+				isolation="DEFAULT" />
+			<!-- <tx:method name="*" read-only="true"/> -->
+		</tx:attributes>
+	</tx:advice>
+	<aop:config>
+		<aop:pointcut id="servicesPointcut"
+			expression="within(com.sikaokeji.owner.framework.service.impl..*)" />
+		<aop:advisor pointcut-ref="servicesPointcut" advice-ref="txAdvice-client" />
+		<aop:advisor pointcut-ref="servicesPointcut" advice-ref="txAdvice-sys"/>
+	</aop:config>
+
+</beans>

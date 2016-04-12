@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.ThirdPartyInstitutionDAO" >
+ 
+  
+
+
+	   <!-- 添加对政府的评论  -->
+	  <insert id="addComment" parameterType="com.sikaokeji.owner.framework.domain.Comment" >
+	    insert into comment (uid, destination_uid, type,  content_type, content, ct)
+	    values (#{uid}, #{destinationUid}, #{type},  #{contentType}, #{content},#{ct})
+	  </insert>
+  
+	  <!-- 获取对政府的评论  -->
+	  <select id="findComment" resultType="com.sikaokeji.owner.framework.domain.Comment" parameterType="com.sikaokeji.owner.framework.domain.Comment">
+	    select 
+	    	uid, destination_uid AS destinationUid, type, content_type AS contentType, content, ct
+	    from 
+	       comment 
+	    where 
+		   destination_uid = #{destinationUid}
+		   AND type = #{type}
+		   AND content_type = #{contentType}
+		   AND isDel = #{isDel}
+	  </select>
+	  
+	  <!-- 获取第三方管辖的小区列表    <where>	<if test="uid !=null">id in (select responsible_id 	from mid_table where responsible_uid = #{uid}and type = 7)	</if></where>-->
+  <select id="getResponseCommunity" parameterType="com.sikaokeji.owner.framework.domain.ThirdPartyInstitution" resultType="com.sikaokeji.owner.framework.domain.Community">
+  	select id,name,headPicture,street,address
+  	from community  	
+  </select>
+  
+  <!--根据小区的id 获取小区的详细信息  -->
+  <select id="getCommunityDetail" resultType="com.sikaokeji.owner.framework.domain.Community" parameterType="com.sikaokeji.owner.framework.domain.Community">
+  	select  c.id,  	
+ 			c.owners_uid AS ownersUid,
+ 			NEIGHBORHOOD_UID as neighborhoodUid,
+ 			c.property_uid AS propertyUid,
+ 			c.government_uid AS governmentUid,
+			c.name,
+			c.province_id provinceId,
+			c.city_id cityId,
+			c.region_id regionId,
+			c.street,
+			c.area,
+			c.households,
+			c.maxBuildingNumber ,
+			c.maxCellNumber ,
+			c.singlebiggestnumber,
+			c.maxfoors,
+			c.address,
+			c.headPicture,
+			c.introduction  
+	 from community c
+ 	 where c.id=#{id}
+  </select>
+  
+  <!--查找可以添加后续工作的议题列表  -->
+  	<select id="findFollowWrokIssue" parameterType="com.sikaokeji.owner.framework.domain.Issue" resultType="com.sikaokeji.owner.framework.domain.Issue">
+  	select i.id,i.name,i.originator_uid AS originatorUid,i.ct,i.status,i.AGREE_NUM as agreeNum,
+  		   i.against_num, i.community_id as communityId,c.name as communityName,i.type,i.building_no as buildingNo
+  	from issue i
+  	left join follow_person f on i.id = f.issueid 
+  	left join community c on i.community_id = c.id
+  	<where>
+  		<if test="communityId!=null and communityId!=''">
+  			i.community_id = #{communityId}
+  		</if>
+  		<if test="uid != null">
+  			and f.uid = #{uid}
+  			and f.status = 1
+  		</if>
+  		<if test="name!=null and name!=''">
+    		and i.name like CONCAT('%','${name}','%')
+   		</if>
+   		<if test="issueTypeId!=null and issueTypeId!=''">
+    		and i.issue_type_id=#{issueTypeId}
+   		</if>
+  		<if test="status!=null">
+  			and i.status = #{status}
+  		</if>
+  		<if test="buildingNo != null">
+	    	and i.building_no = #{buildingNo}
+	    </if>
+	    <if test="type != null">
+	    	and i.type = #{type}
+	    </if>   
+	    <if test="types != null and types !=''">
+	    	and i.type in (${types})
+	    </if>
+  		<if test="statuses != null">
+  			and i.status in (${statuses})
+  		</if>
+  	</where>	   
+  	<if test="1==1">
+    	order by i.ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>    
+  </select>	
+  
+  <!--查找可以审查的议题列表  -->
+  <select id="findToAuditIssue" parameterType="com.sikaokeji.owner.framework.domain.Issue" resultType="com.sikaokeji.owner.framework.domain.Issue">
+  	select i.id,i.name,i.originator_uid AS originatorUid,i.ct,i.status,i.AGREE_NUM as agreeNum,
+  		   i.against_num 
+  	from issue i  	
+  	<where>
+  		<if test="communityId!=null and communityId!=''">
+  			community_id = #{communityId}
+  		</if>  		
+  		<if test="name!=null and name!=''">
+    		and i.name like CONCAT('%','${name}','%')
+   		</if>
+   		<if test="issueTypeId!=null and issueTypeId!=''">
+    		and i.issue_type_id=#{issueTypeId}
+   		</if>
+  		<if test="status!=null">
+  			and i.status = #{status}
+  		</if>
+  		<if test="statuses != null">
+  			and i.status in (${statuses})
+  		</if>
+  		<if test="buildingNo != null">
+	    	and i.building_no = #{buildingNo}
+	    </if>
+	    <if test="type != null">
+	    	and i.type = #{type}
+	    </if>   
+  	</where>	   
+  	<if test="1==1">
+    	order by i.ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>    
+  </select>	
+  
+  
+  <!-- 查找可以结束的议题列表 -->
+  
+</mapper>

@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.OwnerDAO" >
+	
+	  <!-- 获取业主所在的表 -->
+	  <select id="findOwnerTable" parameterType="com.sikaokeji.owner.framework.domain.TOwnerRouting" resultType="com.sikaokeji.owner.framework.domain.TOwnerRouting">
+	  	select id,user_id AS userId,table_name AS tableName
+	  	from t_owner_routing
+	  	where user_id=#{userId} 
+	  </select>
+	  <!-- 修改业主的昵称和个性签名 头像 -->
+	  <update id="updateNickName" parameterType="com.sikaokeji.owner.framework.domain.Owner">
+	  	update ${tableName}
+	  	<set>
+	  		<if test="nickname!=null">
+	  			nickname=#{nickname},
+	  		</if>
+	  		<if test="institution">
+	  			 institution=#{institution},
+	  		</if>
+	  		<if test="headPicture!=null">
+	  			headPicture = #{headPicture}
+	  		</if>
+	  	</set>
+	  	where UID=#{uid}
+	  </update>
+	  <!-- 查找业主的支付密码 -->	
+	  <select id="findOwnerPassword" parameterType="com.sikaokeji.owner.framework.domain.Account" resultType="com.sikaokeji.owner.framework.domain.Account">
+	  	select password ,id
+	  	from   account
+	  	<where>
+	  		<if test="uid!=null and uid!=''">
+	  			uid = #{uid}
+	  		</if>
+	  		<if test="type!=null and type!=''">
+	  			and type = #{type}
+	  		</if>
+	  		<if test="ISDEL!=null and ISDEL!=''">
+	  			and ISDEL = #{ISDEL}
+	  		</if>
+	  	</where>	 
+	  </select>
+	  <!-- 在订单中新增商品 -->
+	  <insert id="addOrderGoods" parameterType="com.sikaokeji.owner.framework.domain.OrderGoods" >
+	    insert into order_goods ( order_id, goods_id, num, ct)
+	    values (#{orderId}, #{goodsId}, #{num}, #{ct})
+	  </insert> 
+	 
+	  <!-- 新增订单   -->
+	  <insert id="generateOrders" parameterType="com.sikaokeji.owner.framework.domain.PayOrder" useGeneratedKeys="true" keyProperty="id" >
+	    insert into pay_order ( id, pay_uid, payee_uid, amount, status, ct)
+	    values ( #{id}, #{payUid}, #{payeeUid}, #{amount}, #{status}, #{ct})
+	  </insert>
+	  
+	  <!-- 添加收货地址 -->
+	  <insert id="addAddress" parameterType="com.sikaokeji.owner.framework.domain.TDeliveryAddress" >
+	    insert into t_delivery_address ( uid, name, address, mobile, ct)
+	    values (#{uid}, #{name}, #{address}, #{mobile}, #{ct})
+	  </insert>
+	  
+	  <!-- 获取收货地址列表-->
+	  <select id="findAddress" resultType="com.sikaokeji.owner.framework.domain.TDeliveryAddress" parameterType="com.sikaokeji.owner.framework.domain.TDeliveryAddress">
+	    select 
+			id,uid, name, address, mobile
+	    from 
+	        t_delivery_address
+	    where
+		    uid = #{uid}
+		    AND is_del = #{isDel}
+	  </select>
+	  
+	  <!-- 添加至购物车 -->
+	  <insert id="addGoodToCart" parameterType="com.sikaokeji.owner.framework.domain.TShoppingCart" >
+	    insert into t_shopping_cart (uid, goods_id)
+	    values (#{uid}, #{goodsId})
+	  </insert>
+	  
+	  <!-- 获取购物车商品列表-->
+	  <select id="findGoodToCart" resultType="com.sikaokeji.owner.framework.domain.TShoppingCart" parameterType="com.sikaokeji.owner.framework.domain.TShoppingCart">
+	    select 
+			d.id,d.uid, d.goods_id AS goodsId, d.num, g.name AS goodsName
+	    from 
+	        t_shopping_cart d
+	    left join t_goods g on d.goods_id = g.id
+	    where
+		    uid = #{uid}
+		    AND is_del = #{isDel}
+	  </select>
+  
+  	  <!-- 添加对商品的评论  -->
+	  <insert id="addComment" parameterType="com.sikaokeji.owner.framework.domain.Comment" >
+	    insert into comment (uid, destination_uid, type,  content_type, content, ct,score)
+	    values (#{uid}, #{destinationUid}, #{type},  #{contentType}, #{content},#{ct},#{score})
+	  </insert>
+  	<!-- 对商品进行评价时 修改订单商品表（order_goods）的type 为1 -->
+  	<update id="updateOrderGoods" parameterType="com.sikaokeji.owner.framework.domain.OrderGoods" >
+  		update order_goods
+  		set type=1
+  		<where>
+  			<if test="orderId!=null and orderId!=''">
+  				order_id=#{orderId}
+  			</if>
+  			<if test="goodsId!=null and goodsId!=''">
+  				and goods_id=#{goodsId}
+  			</if>
+  		</where>
+  	</update>
+	  <!-- 获取对商品的评论  -->
+	  <select id="findComment" resultType="com.sikaokeji.owner.framework.domain.Comment" parameterType="com.sikaokeji.owner.framework.domain.Comment">
+	    select 
+	    	uid, destination_uid AS destinationUid, type, content_type AS contentType, content, ct
+	    from 
+	       comment 
+	    where 
+		   destination_uid = #{destinationUid}
+		   AND type = #{type}
+		   AND content_type = #{contentType}
+		   AND isDel = #{isDel}
+		   <if test="1==1">
+	    		order by ct desc
+		    </if>
+		    <if test="pageNum!=null ">
+		    	 limit #{pageNum},#{pageSize}
+		    </if>
+		   
+	  </select>
+	  <!-- 新增授权时判断是否已经授权 -->
+	  <select id="findAuthorized" parameterType="com.sikaokeji.owner.framework.domain.Authorize" resultType="com.sikaokeji.owner.framework.domain.Authorize">
+	  	select id, ISSUE_TYPE_IDS as issueTypeIds
+	  	from authorize
+	  	<where>
+	  		<if test="authorizeUid !=null">
+	  			authorize_uid = #{authorizeUid}
+	  		</if>
+	  		<if test="authorizedUid !=null">
+	  			and authorized_uid = #{authorizedUid}
+	  		</if>
+	  		<if test="issue_id != null">
+	  			and issue_id = #{issue_id}
+	  		</if>
+	  		<if test="issueTypeIds!=null and issueTypeIds!=''">
+	  			and ISSUE_TYPE_IDS like  CONCAT('%','${issueTypeIds}','%')
+	  		</if>
+	  		<if test="ct != null">
+	  			and end_time &gt;= #{ct}
+	  		</if>
+	  		<if test="type != null">
+	  			and type = #{type}
+	  		</if>
+	  		<if test="communityId != null">
+	  			and communityId = #{communityId}
+	  		</if>
+	  		<if test="1==1">
+	  			and ISDEL = 0
+	  		</if>
+	  		<if test="1==1">
+	  			and status != 2
+	  		</if>
+	  	</where>
+	  </select>
+	  
+	  <!-- 议题授权时 查找议题的类型 -->
+	  <select id="findIssueType" parameterType="com.sikaokeji.owner.framework.domain.Issue" resultType="com.sikaokeji.owner.framework.domain.Issue">
+	  	select id,ISSUE_TYPE_ID as issueTypeId
+	  	from issue
+	  	where id = #{id}
+	  </select>
+	  <!-- 申请授权添加  -->
+	  <insert id="addAuthorize" parameterType="com.sikaokeji.owner.framework.domain.Authorize" >
+	    insert into authorize ( authorize_uid, authorized_uid,  ISSUE_TYPE_IDS, protocol_file, 
+	    						end_time, status, ct,issue_id,type,communityId)
+	    values (#{authorizeUid}, #{authorizedUid}, #{issueTypeIds,jdbcType=VARCHAR}, 
+	     #{protocolFile}, #{endTime}, #{status},#{ct},#{issue_id,jdbcType=BIGINT},#{type},#{communityId})
+	  </insert>
+	  
+	  
+	  
+	  <!-- 获取授权详情  -->
+	  <select id="getAuthorize" resultType="com.sikaokeji.owner.framework.domain.Authorize" parameterType="com.sikaokeji.owner.framework.domain.Authorize">
+	    select 
+	    	id, authorize_uid AS authorizeUid, authorized_uid AS authorizedUid, issue_type_ids AS issueTypeIds, protocol_file AS protocolFile, end_time AS endTime, status, ct
+	    from 
+	       authorize 
+	    where 
+		   id = #{id}
+		   and isdel = #{isdel}
+	  </select>
+	  
+	  <!-- 获取授权列表   -->
+	  <select id="findAuthorize" resultType="com.sikaokeji.owner.framework.domain.Authorize" parameterType="com.sikaokeji.owner.framework.domain.Authorize">
+	    select 
+	    	id, authorize_uid AS authorizeUid, authorized_uid AS authorizedUid, issue_type_ids AS issueTypeIds, protocol_file AS protocolFile, end_time AS endTime, status, ct
+	    from 
+	       authorize 
+	    where 
+		   1 = 1
+		   <if test=" authorizeUid != null and authorizeUid != '' ">
+		   	and authorize_uid = #{authorizeUid}
+		   </if>
+		   <if test=" authorizedUid != null and authorizedUid != '' ">
+		   	and authorized_uid = #{authorizedUid}
+		   </if>
+		   <if test="1==1">
+		    	order by ct desc
+		    </if>
+		    <if test="pageNum!=null ">
+		    	 limit #{pageNum},#{pageSize}
+		    </if>
+		   
+	  </select>
+	  
+	  <!-- 获取订单列表   -->
+	  <select id="findPayOrder" resultType="com.sikaokeji.owner.framework.domain.PayOrder" parameterType="com.sikaokeji.owner.framework.domain.PayOrder">
+	    select 
+	    	id,pay_uid AS payUid,payee_uid AS payeeUid,amount,status
+	    from 
+	        pay_order 
+	    where 
+		   pay_uid = #{payUid}
+		<if test="1==1">
+	    	order by ct desc
+	    </if>
+	    <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>
+	     
+	  </select>
+	  
+	  <!-- 获取订单商品列表   -->
+	  <select id="findOrderGoods" resultType="com.sikaokeji.owner.framework.domain.OrderGoods" parameterType="com.sikaokeji.owner.framework.domain.OrderGoods">
+	    select 
+	    	p.id, p.order_id AS orderId, p.goods_id AS goodsId, g.name AS goodsName,ct
+	    from 
+	        order_goods p
+	    left join t_goods g on g.id = p.goods_id
+	    where 
+		   order_id = #{orderId}
+	  </select>
+	  
+	  <!-- 获取订单详情   -->
+	  <select id="getPayOrder" resultType="com.sikaokeji.owner.framework.domain.PayOrder" parameterType="com.sikaokeji.owner.framework.domain.PayOrder">
+	    select 
+	    	id, pay_uid AS payUid, payee_uid AS payeeUid, amount, status
+	    from 
+	        pay_order 
+	    where 
+		    id = #{id}
+		    <if test="status != null">
+			    AND status = #{status}
+		    </if>
+	  </select>
+	  
+	  <update id="editPayOrder">
+	  		update
+	  		      pay_order
+	  	    set
+	  	    	status = #{status}
+	  	    where 
+	  	        id = #{id}
+	  </update>
+	  
+	  <!-- 获取业主代表  -->
+	  <select id="findOwnerRepre" resultType="com.sikaokeji.owner.framework.domain.OwnerRepresentative" parameterType="com.sikaokeji.owner.framework.domain.OwnerRepresentative">
+	    select 
+	    	  id, owner_uid AS ownerUid, representative_uid AS representativeUid, constract, status, ct
+	    from 
+	        owner_representative
+	    where
+	         owner_uid = #{ownerUid}
+	         AND status = #{status}
+	  </select>
+	  <!-- 查询我的服务列表 -->
+	  <select id="findTServiceList" parameterType="com.sikaokeji.owner.framework.domain.TServices" resultType="com.sikaokeji.owner.framework.domain.TServices">
+		select 
+			id,NEED_SERVICE_UID AS needServiceUid,title,content,status,
+			all_type_id AS allTypeId,ct,
+			(select name from t_all_type ta where ta.id = t.ALL_TYPE_ID) allTypeStr
+		from t_services t
+		<where>
+			<if test="needServiceUid!=null and needServiceUid!=''">
+				NEED_SERVICE_UID=#{needServiceUid}
+			</if>
+			<if test="allTypeId!=null and allTypeId!=''">
+				and all_type_id=#{allTypeId}
+			</if>
+			<if test="status!=null ">
+				and status=#{status}
+			</if>
+		</where>
+		<if test="1==1">
+	    	order by ct desc
+	    </if>
+	    <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>	  
+	  </select>
+	  <!-- 查看服务详情 -->
+	  <select id="findTService" parameterType="com.sikaokeji.owner.framework.domain.TServices" resultType="com.sikaokeji.owner.framework.domain.TServices">
+	  	select t.id,NEED_SERVICE_UID AS needServiceUid,title,content,repair_image_url AS repairImageUrl,
+	  			repair_uid repairUid,tp.name as servicePersonName,tp.headPicture as repairUidPicture,
+			   tp.mobile AS servicePersonMobile,repair_person_certificates_url AS 	repairPersonCertificatesUrl,
+			   all_type_id AS allTypeId,t.ct,tp.position as position,
+			   (select name from t_all_type ta where ta.id = t.ALL_TYPE_ID) allTypeStr
+		from   t_services t
+		left join t_work_plan_person tp on t.SERVICE_PERSON_ID = tp.id
+		<where>
+			<if test="id!=null and id!=''">
+				t.id=#{id}
+			</if>
+		</where>	   
+	  </select>
+	  <!-- 业主确认服务 -->
+	  <update id="updateTServices" parameterType="com.sikaokeji.owner.framework.domain.TServices">
+	  	update 	t_services
+	  	set status=#{status}
+	  	where id=#{id}
+	  	and status = 1
+	  </update>
+	  <!-- 获取业主的已经评价列表 -->
+		<select id="findCommentList" parameterType="com.sikaokeji.owner.framework.domain.Comment" resultType="com.sikaokeji.owner.framework.domain.Comment">
+			select 
+				id,uid,type,destination_uid AS destinationUid,content_type AS contentType,
+				content,ct,score,isDel
+			from comment
+			<where>
+				<if test="1==1">
+					uid=#{uid} 
+				</if>
+				<if test="type!=null and type!=''">
+					and type=#{type}
+				</if>
+				<if test="allTypeId!=null and allTypeId!=''">
+					and all_type_id=#{allTypeId} 
+				</if>
+				<if test="contentType!=null and contentType!=''">
+					and content_type=#{contentType}
+				</if>
+			</where>
+			<if test="1==1">
+		    	order by ct desc
+		    </if>
+		    <if test="pageNum!=null ">
+		    	 limit #{pageNum},#{pageSize}
+		    </if>
+		   
+		</select>
+		<!-- 查看业主已经评价的 评价内容和得分 -->
+		<select id="getComment" parameterType="com.sikaokeji.owner.framework.domain.Comment" resultType="com.sikaokeji.owner.framework.domain.Comment">
+			select 
+				id,uid,type,destination_uid AS destinationUid,content_type AS contentType,
+				content,ct,score,isDel
+			from comment
+			where id=#{id}
+		</select>
+		<!-- 获取未评价的商品列表 -->
+		<select id="findNoCommentGoods" parameterType="com.sikaokeji.owner.framework.domain.TGoods" resultType="com.sikaokeji.owner.framework.domain.TGoods">	
+			select id,name,introduction,image_url AS imageUrl,score,ct
+			from t_goods 
+			where id in(			
+						select goods_id  
+						from order_goods 
+						where order_id in(  select id 
+											from pay_order 
+											where pay_uid=#{merchantUid} and 
+											STATUS=1 
+											and type=1
+										)
+						and type!=1				
+						)				
+		</select>
+		
+		<!-- 添加建议和意见 -->
+	  <insert id="addAdvice" parameterType="com.sikaokeji.owner.framework.domain.Advice">
+		    insert into advice (proponentuid, responseuid, 
+		    				content, ct)
+		    values ( #{proponentuid,jdbcType=BIGINT}, #{responseuid,jdbcType=BIGINT}, 
+				      #{content,jdbcType=VARCHAR}, #{ct,jdbcType=BIGINT}
+				     )
+	  </insert>
+	  
+	  
+	  
+	  
+		
+</mapper>

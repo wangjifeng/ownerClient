@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.2.xsd"
+	default-autowire="byName" default-lazy-init="true">
+
+    <!-- 业务DAO接口注入 -->
+	<bean id="baseMapperClient" class="org.mybatis.spring.mapper.MapperFactoryBean"
+		abstract="true" lazy-init="true">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory-client" />
+	</bean>
+	
+	
+   <!-- 议题DAO接口注入 -->
+   <bean id = "issueDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.IssueDAO"></property>
+   </bean>
+	
+   <!-- 物业DAO接口注入 -->
+   <bean id = "propertyDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.PropertyDAO"></property>
+   </bean>
+   
+   <!-- 监委会DAO接口注入 -->
+   <bean id = "committeeDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.CommitteeDAO"></property>
+   </bean>
+   
+   <!-- 律师DAO接口注入 -->
+   <bean id = "lawyerDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.LawyerDAO"></property>
+   </bean>
+   
+   <!-- 业委会DAO接口注入 -->
+   <bean id = "ownersCommitteeDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.OwnersCommitteeDAO"></property>
+   </bean>
+   
+   <!-- 支付账户DAO接口注入 -->
+   <bean id = "accountDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.AccountDAO"></property>
+   </bean>
+   
+   <!-- 监委会DAO接口注入 -->
+   <bean id = "oversightCommitteeDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.OversightCommitteeDAO"></property>
+   </bean>
+	
+    <!-- 居委会DAO接口注入 -->
+   <bean id = "neighborhoodCommitteeDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.NeighborhoodCommitteeDAO"></property>
+   </bean>
+   
+    <!-- 政府DAO接口注入 -->
+   <bean id = "governmentDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.GovernmentDAO"></property>
+   </bean>
+   
+    <!-- 政府DAO接口注入 -->
+   <bean id = "thirdPartyInstitutionDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.ThirdPartyInstitutionDAO"></property>
+   </bean>
+   
+   <!-- 商家DAO接口注入 -->
+   <bean id = "businessDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.BusinessDAO"></property>
+   </bean>
+   
+   <!-- 业主相关DAO接口注入 -->
+   <bean id = "ownerDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.OwnerDAO"></property>
+   </bean>
+	
+	<!--  -->
+	<bean id="tpropertyCompanyDetailDao" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.TpropertyCompanyDetailDao"></property>
+	</bean>
+	
+	
+	<!-- 右侧边栏数据DAO接口注入-->
+	<bean id="rightSideBarDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.RightSideBarDAO"></property>
+	</bean>
+	
+	<!-- 群管理 -->
+	<bean id = "groupManageDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.GroupManageDAO"></property>
+	</bean>
+	
+	<!-- 议题意向-->
+	<bean id = "issueIntentionDAO" parent="baseMapperClient">
+		<property name="mapperInterface" value="com.sikaokeji.owner.framework.dao.IssueIntentionDAO"></property>
+	</bean>
+</beans>

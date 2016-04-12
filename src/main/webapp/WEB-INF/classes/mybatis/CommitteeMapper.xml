@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.CommitteeDAO" >
+ 
+  <!-- 创建议题时获取小区的监委会  -->
+  <select id="getCommittee" resultType="com.sikaokeji.owner.framework.domain.Committee" parameterType="com.sikaokeji.owner.framework.domain.Committee">
+	    select 
+			id,uid,mobile,name,member_information
+	    from 
+	        committee
+	    where
+	        community_id = #{communityId}
+	    limit 1
+  </select>
+  
+</mapper>

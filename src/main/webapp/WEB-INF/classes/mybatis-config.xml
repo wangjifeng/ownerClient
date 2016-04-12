@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- sql语句打印 -->
+	<!-- <settings>
+		<setting name="logImpl" value="STDOUT_LOGGING" />
+		<setting name="logImpl" value="LOG4J"/>
+	</settings> -->
+
+	<!-- 注册sql配置文件 -->
+	<mappers>
+		<mapper resource="mybatis/CUserAccountMapper.xml" />
+		<mapper resource="mybatis/IssueMapper.xml" />
+		<mapper resource="mybatis/PropertyMapper.xml" />
+		<mapper resource="mybatis/CommitteeMapper.xml" />
+		<mapper resource="mybatis/LawyerMapper.xml" />
+		<mapper resource="mybatis/OwnersCommitteeMapper.xml" />
+		<mapper resource="mybatis/AccountMapper.xml" />
+		<mapper resource="mybatis/OversightCommitteeMapper.xml" />
+		<mapper resource="mybatis/NeighborhoodCommitteeMapper.xml" />
+		<mapper resource="mybatis/ThirdPartyInstitutionMapper.xml" />
+		<mapper resource="mybatis/GovernmentMapper.xml" />
+		<mapper resource="mybatis/BusinessMapper.xml" />
+		<mapper resource="mybatis/OwnerMapper.xml" />
+		<mapper resource="mybatis/RightSideBarMapper.xml"/>
+		<mapper resource="mybatis/TpropertyCompanyDetail.xml"/>
+		<mapper resource="mybatis/GroupManageDao.xml" />
+		<mapper resource="mybatis/IssueIntentionMapper.xml" />
+	</mappers> 
+
+</configuration>

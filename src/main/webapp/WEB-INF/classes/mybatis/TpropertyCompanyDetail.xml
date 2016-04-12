@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.TpropertyCompanyDetailDao" >
+ 
+  <!-- 通过小区的id 查找物业用户ID-->	 
+  <select id="findTpropertyId" parameterType="com.sikaokeji.owner.framework.domain.Community" resultType="com.sikaokeji.owner.framework.domain.Community">
+  	select property_uid AS propertyUid
+  	from community
+  	<where>
+  		<if test="id!=null and id!=''">
+  			id=#{id}
+  		</if>
+  	</where>
+  		
+  </select>	
+  <!-- 通过路由查找物业公司所在的表-->
+  <select id="findTpropertyTable" resultType="com.sikaokeji.owner.framework.domain.TPropertyRouting" parameterType="com.sikaokeji.owner.framework.domain.TPropertyRouting">
+  	select id,user_id userId,table_name tableName
+  	from t_property_routing
+  	<where>
+  		<if test="userId!=null and userId!=''">
+  			user_id=#{userId}
+  		</if>
+  	</where>
+  </select>
+  <!--查找物业公司的信息  -->
+  <select id="findTpropertyCompanyDetail" parameterType="com.sikaokeji.owner.framework.domain.TPropertyCompanyDetail" resultType="com.sikaokeji.owner.framework.domain.TPropertyCompanyDetail">
+  		select id,user_id AS userId,name,headPicture,score,
+  			   telephone_number AS telephoneNumber,introduction,
+  			   commentnum,IS_EVALUATION as isEvaluation,backgroundPicture
+  		from ${tableName} i  
+  		<where>
+  			<if test="userId!=null and userId!='' ">
+  				i.user_id=#{userId}
+  			</if>
+  		</where> 
+  </select>
+  
+  
+</mapper>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.ApplicationDAO" >
+  <resultMap id="BaseResultMap" type="com.sikaokeji.owner.framework.domain.Application" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="uid" property="uid" jdbcType="BIGINT" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="open_or_close" property="openOrClose" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="ct" property="ct" jdbcType="BIGINT" />
+    <result column="et" property="et" jdbcType="BIGINT" />
+    <result column="idel" property="idel" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, uid, type, open_or_close, title, content, status, ct, et, idel
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from application
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from application
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.sikaokeji.owner.framework.domain.Application" >
+    insert into application (id, uid, type, 
+      open_or_close, title, content, 
+      status, ct, et, idel
+      )
+    values (#{id,jdbcType=INTEGER}, #{uid,jdbcType=BIGINT}, #{type,jdbcType=INTEGER}, 
+      #{openOrClose,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, 
+      #{status,jdbcType=INTEGER}, #{ct,jdbcT369369
+      ype=BIGINT}, #{et,jdbcType=BIGINT}, #{idel,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.sikaokeji.owner.framework.domain.Application" >
+    insert into application
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="uid != null" >
+        uid,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="openOrClose != null" >
+        open_or_close,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="ct != null" >
+        ct,
+      </if>
+      <if test="et != null" >
+        et,
+      </if>
+      <if test="idel != null" >
+        idel,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="uid != null" >
+        #{uid,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="openOrClose != null" >
+        #{openOrClose,jdbcType=INTEGER},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="ct != null" >
+        #{ct,jdbcType=BIGINT},
+      </if>
+      <if test="et != null" >
+        #{et,jdbcType=BIGINT},
+      </if>
+      <if test="idel != null" >
+        #{idel,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.sikaokeji.owner.framework.domain.Application" >
+    update application
+    <set >
+      <if test="uid != null" >
+        uid = #{uid,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="openOrClose != null" >
+        open_or_close = #{openOrClose,jdbcType=INTEGER},
+      </if>
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="ct != null" >
+        ct = #{ct,jdbcType=BIGINT},
+      </if>
+      <if test="et != null" >
+        et = #{et,jdbcType=BIGINT},
+      </if>
+      <if test="idel != null" >
+        idel = #{idel,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.sikaokeji.owner.framework.domain.Application" >
+    update application
+    set uid = #{uid,jdbcType=BIGINT},
+      type = #{type,jdbcType=INTEGER},
+      open_or_close = #{openOrClose,jdbcType=INTEGER},
+      title = #{title,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      ct = #{ct,jdbcType=BIGINT},
+      et = #{et,jdbcType=BIGINT},
+      idel = #{idel,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

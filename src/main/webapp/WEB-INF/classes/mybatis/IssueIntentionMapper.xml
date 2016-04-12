@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.IssueIntentionDAO" >
+	
+	<!-- 查看小区是否有业主大会 -->
+	<select id="findCommunityType" parameterType="com.sikaokeji.owner.framework.domain.Community" resultType="com.sikaokeji.owner.framework.domain.Community">
+		select id,type,OWNERS_UID as ownersUid,government_uid as governmentUid
+		from community
+		where id = #{id}
+	</select>
+	
+	<!-- 新增议题意向 -->
+	<insert id="addIssueIntention" parameterType="com.sikaokeji.owner.framework.domain.IssueIntention" >
+	    insert into issue_intention (issue_type_id, title, 
+	      content, status, originator_uid,
+	      ct,community_id,type)
+	    values ( #{issueTypeId,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR}, 
+	      #{content,jdbcType=VARCHAR},#{status,jdbcType=INTEGER}, #{originatorUid,jdbcType=BIGINT}, 
+	      #{ct,jdbcType=BIGINT},#{communityId},#{type}
+	    )
+    </insert>
+    
+    <!-- 查找投票中的议题意向 -->
+    <select id="findIssueIntention" parameterType="com.sikaokeji.owner.framework.domain.IssueIntention" resultType="com.sikaokeji.owner.framework.domain.IssueIntention">
+    	select  i.id, i.issue_type_id as issueTypeId, i.title, 
+    			i.against_num as againstNum, 
+    			i.agree_num as agreeNum, i.status, i.originator_uid as originatorUid, 
+    			i.ct,c.name as communityName,
+    			(select name from issue_type it where it.id = i.issue_type_id) as issueTypeStr
+    	from issue_intention i
+    	left join community c  on c.id = i.community_id
+    	<where>
+    		<if test="title != null and title != ''">
+    			i.title like CONCAT('%','${title}','%')
+    		</if>
+    		<if test="status != null">
+    			and i.status = #{status}
+    		</if>
+    		<if test="issueTypeId != null">
+    			and i.issue_type_id = #{issueTypeId}
+    		</if>
+    		<if test="statuses != null and statuses !=''">
+    			and i.status in (${statuses})
+    		</if>
+    		<if test="communityIds != null and communityIds != ''">
+    			and i.community_id in (${communityIds})
+    		</if>   
+    		<if test="1 == 1">
+    			and i.isdel = 0
+    		</if>
+    		<if test="communityId != null">
+    			and i.community_id = #{communityId}
+    		</if>
+    		<if test="originatorUid != null">
+    			and i.originator_uid = #{originatorUid}
+    		</if>
+    	</where>		
+    	order by ct desc
+    	<if test="pageNum!=null ">
+	    	limit #{pageNum},#{pageSize}
+	    </if>
+    </select>
+        
+    <!-- 根据议题意向的id查找议题意向详情 -->
+    <select id="findIssueIntentionDetail" parameterType="com.sikaokeji.owner.framework.domain.IssueIntention" resultType="com.sikaokeji.owner.framework.domain.IssueIntention">
+    	select  i.id, i.issue_type_id as issueTypeId, i.title,i.content, 
+    			i.against_num as againstNum, i.agree_num as agreeNum,
+    			i.status, i.originator_uid as originatorUid,i.ct,
+    			i.community_id as communityId,c.households as households,i.type	     			
+    	from issue_intention i
+    	left join community c on i.community_id = c.id
+    	where i.id = #{id}
+    </select>
+   <!-- 修改锁数据 -->
+   <select id="findDetailForUpdate" parameterType="com.sikaokeji.owner.framework.domain.IssueIntention" resultType="com.sikaokeji.owner.framework.domain.IssueIntention">
+   	select  i.id, i.issue_type_id as issueTypeId, i.title,i.content, 
+    			i.against_num as againstNum, i.agree_num as agreeNum,
+    			i.status, i.originator_uid as originatorUid,i.ct,
+    			i.community_id as communityId,c.households as households	     			
+    	from issue_intention i
+    	left join community c on i.community_id = c.id
+    	where i.id = #{id} for update
+   </select>
+   
+   
+   <!-- 修改议题意向的投票 --> 
+   <update id="updateIssueIntention" parameterType="com.sikaokeji.owner.framework.domain.IssueIntention" >
+   	 update issue_intention
+   	 <set>
+   	 	<if test="status != null">
+   	 		status = #{status},
+   	 	</if>
+   	 	<if test="et != null">
+   	 		 et = #{et},	
+   	 	</if>
+   	 	<if test="agreeNum != null">
+   	 		agree_num = agree_num+#{agreeNum},
+   	 	</if>
+   	 	<if test="againstNum != null">
+   	 		against_num = against_num + #{againstNum}
+   	 	</if>
+   	 </set>    	 	
+   	 where id = #{id}
+   	 	   and status = 1 	
+   </update>
+    
+    <!-- 业委会审核议题意向 -->
+	 <update id="auditIssueIntention" parameterType="com.sikaokeji.owner.framework.domain.IssueIntention">
+	 	update issue_intention
+	 	set status = #{status},
+	 		et = #{et}
+	 	where id = #{id}
+	 	and  status in (2,6,7)
+	 </update>
+	
+	 <!-- 查找政府负责的小区列表 -->
+	 <select id="getResponseCommunity" parameterType="com.sikaokeji.owner.framework.domain.MidTable" resultType="com.sikaokeji.owner.framework.domain.MidTable">
+	 	select responsible_id 
+	 	from mid_table
+	 	where responsible_uid = #{responsible_uid}
+	 	and type = #{type}
+	 	and isdel = 0
+	 </select>
+	 
+	 <!-- 政府查找待审核的议题意向列表 -->
+	 <select id="OLDfindGoToAuditIssueIntention" parameterType="com.sikaokeji.owner.framework.domain.IssueIntention" resultType="com.sikaokeji.owner.framework.domain.IssueIntention">
+	 	select a.* from (
+			 	select  i.id, i.issue_type_id as issueTypeId, i.title, 
+		    			i.against_num as againstNum, 
+		    			i.agree_num as agreeNum, i.status, i.originator_uid as originatorUid, 
+		    			i.ct,
+		    			(select name from issue_type it where it.id = i.id) as issueTypeStr,
+		    			c.name as communityName
+		    	from issue_intention i
+		    	left join community c on i.community_id = c.id
+		    	<where>
+		    		<if test="communityIds != null and communityIds != ''">
+		    			i.community_id in (${communityIds})
+		    		</if>
+		    		<if test="1 == 1 ">
+		    			and c.OWNERS_UID is null
+		    		</if>	
+		    				
+		    		<if test=" 1==1 ">
+		    			and i.status = 2
+		    		</if>	
+		    	</where>
+		    	union 
+		    	select  i.id, i.issue_type_id as issueTypeId, i.title, 
+		    			i.against_num as againstNum, 
+		    			i.agree_num as agreeNum, i.status, i.originator_uid as originatorUid, 
+		    			i.ct,
+		    			(select name from issue_type it where it.id = i.id) as issueTypeStr,
+		    			c.name as communityName
+		    	from issue_intention i
+		    	left join community c on i.community_id = c.id
+		    	<where>
+		    		<if test="communityIds != null and communityIds != ''">
+		    			i.community_id in (${communityIds})
+		    		</if>    		    		 		
+		    		<if test="1 == 1">
+		    			and i.status = 7
+		    		</if>	
+		    	</where>
+		  )a
+		  order by a.ct desc
+    	<if test="pageNum!=null ">
+	    	limit #{pageNum},#{pageSize}
+	    </if>  	
+	 </select>	 
+	 
+	 <!-- 政府查找待审核的议题意向列表 -->
+	 <select id="findGoToAuditIssueIntention" parameterType="com.sikaokeji.owner.framework.domain.IssueIntention" resultType="com.sikaokeji.owner.framework.domain.IssueIntention">
+		select  i.id, i.issue_type_id as issueTypeId, i.title, 
+    			i.against_num as againstNum, 
+    			i.agree_num as agreeNum, i.status, i.originator_uid as originatorUid, 
+    			i.ct,
+    			(select name from issue_type it where it.id = i.id) as issueTypeStr,
+    			c.name as communityName,c.type<!-- 这个type查的是 小区的type  不是 议题意向的type  以后委会修改请注意   之所以查小区的type是因为 政府处理通过时  需要根据这个类型 判断议题是否应该后续工作选截止时间-->
+    	from issue_intention i
+    	left join community c on i.community_id = c.id
+    	<where>
+    		<if test="communityIds != null and communityIds != ''">
+    			i.community_id in (${communityIds})
+    		</if>    		    		 		
+    		<if test="1 == 1">
+    			and i.status = 7
+    		</if>	
+    	</where>		 
+	   order by ct desc
+   	  <if test="pageNum!=null ">
+    	limit #{pageNum},#{pageSize}
+      </if>  	
+ </select>
+ 	
+ <!-- 查找已经投过票的议题议题意向 -->
+ <select id="findVoteIssueIntention" parameterType="com.sikaokeji.owner.framework.domain.IssueIntention" resultType="com.sikaokeji.owner.framework.domain.IssueIntention">
+ 	select  i.id, i.issue_type_id as issueTypeId, i.title, 
+   			 i.against_num as againstNum, 
+   			i.agree_num as agreeNum, i.status, i.originator_uid as originatorUid, 
+   			i.ct,
+   			(select name from issue_type it where it.id = i.id) as issueTypeStr
+   	from issue_intention i
+   	left join vote v on i.id=v.issue_id
+  	where v.uid  =#{originatorUid} 
+  	and i.community_id=#{communityId}  
+  	and v.type = 2       
+  	<if test="title != null">
+		and i.title like CONCAT('%','${title}','%')
+	</if>
+  	<if test="status != null">
+		and i.status = #{status}
+	</if>
+	<if test="issueTypeId != null">
+		and i.issue_type_id = #{issueTypeId}
+	</if>
+	<if test="statuses != null and statuses !=''">
+		and i.status in (${statuses})
+	</if>
+	<if test="1 == 1">
+		and i.isdel = 0
+	</if>        
+  	<if test="1==1">
+	     	order by i.ct desc
+    </if>   
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>    
+ </select>
+ 
+ 
+</mapper>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.BusinessDAO" >
+
+	  <!-- 获取商家分类-->
+	  <select id="findAllType" resultType="com.sikaokeji.owner.framework.domain.TAllType" parameterType="com.sikaokeji.owner.framework.domain.TAllType">
+	    select 
+			id,name,introduction,type,ct,et
+	    from 
+	        t_all_type
+	    where
+		    type = #{type}
+	  </select>
+	  
+	  <!-- 获取商家列表  -->
+	  <select id="findBusiness" resultType="com.sikaokeji.owner.framework.domain.Business" parameterType="com.sikaokeji.owner.framework.domain.Business">
+	    select 
+			id,mobile,uid,headpicture,longitude,latitude,address,realname,tax_license AS taxLicense,name,all_type_id AS allTypeId,score 
+	    from 
+	        business
+	    where
+	        1 = 1
+	    <if test="allTypeId != null and allTypeId != ''">
+	   		all_type_id = #{allTypeId}
+	    </if>
+	    <!-- 计算坐标范围 -->
+	    <if test="longitude != null and longitude != '' and latitude != null and latitude != ''">
+	    	AND sqrt(  
+				    (  
+				     ((113.914619-${longitude})*PI()*12656*cos(((22.50128+${latitude})/2)*PI()/180)/180)  
+				     *  
+				     ((113.914619-${longitude})*PI()*12656*cos (((22.50128+${latitude})/2)*PI()/180)/180)  
+				    )  
+				    +  
+				    (  
+				     ((22.50128-${latitude})*PI()*12656/180)  
+				     *  
+				     ((22.50128-${latitude})*PI()*12656/180)  
+				    )  
+				)&lt;${distance}
+	    </if>
+		 limit ${pageNum},${pageSize}
+	  </select>
+	  
+	  <!-- 获取商家的商品类型列表  -->
+	  <select id="findGoodsType" resultType="com.sikaokeji.owner.framework.domain.TGoodsType" parameterType="com.sikaokeji.owner.framework.domain.TGoodsType">
+	    select 
+			id,name,merchant_id AS merchantId,sort
+		from 
+	        t_goods_type
+	    where
+	   		merchant_id = #{merchantId}
+	    order by sort asc
+	  </select>
+	  
+	  <!-- 获取商家的商品列表  -->
+	  <select id="findGoods" resultType="com.sikaokeji.owner.framework.domain.TGoods" parameterType="com.sikaokeji.owner.framework.domain.TGoods">
+	    select 
+			id,merchant_uid AS merchantUid,image_url AS imageUrl,name,introduction,unit_price AS unitPrice,all_type AS allType,score,ct,et
+		from 
+	        t_goods
+	    where
+	   		merchant_uid = #{merchantUid}
+	    <if test="allType != null and allType != ''">
+	   		all_type = #{allType}
+	    </if>
+	    limit ${pageNum},${pageSize}
+	  </select>
+	  
+	  <!-- 获取商家的商品类型列表  -->
+	  <select id="getGoods" resultType="com.sikaokeji.owner.framework.domain.TGoods" parameterType="com.sikaokeji.owner.framework.domain.TGoods">
+	    select 
+			id,merchant_uid AS merchantUid,name,introduction,unit_price AS unitPrice,all_type AS allType,ct,et
+		from 
+	        t_goods
+	    where
+	        id = #{id}
+	  </select>
+	  
+  
+</mapper>

@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.PropertyDAO" >
+ 
+  
+  <!-- 获取物业合同列表 -->
+  <select id="findPropertyContract" resultType="com.sikaokeji.owner.framework.domain.TPropertyContract" parameterType="com.sikaokeji.owner.framework.domain.TPropertyContract">
+    select 
+		id,pro_uid AS proUid,title,all_type_id AS allTypeId,ct,content
+    from 
+        t_property_contract
+    where
+        pro_uid = #{proUid}
+        <if test="allTypeId != null and allTypeId != ''">
+	       AND all_type_id = #{allTypeId}
+        </if>
+     <if test="1==1">
+    	order by ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>   
+  </select>
+  
+  
+  <!-- 获取物业合同详情-->
+  <select id="getPropertyContract" resultType="com.sikaokeji.owner.framework.domain.TPropertyContract" parameterType="com.sikaokeji.owner.framework.domain.TPropertyContract">
+    select 
+		id,pro_uid AS proUid,title,content,all_type_id AS allTypeId,ct,picture
+    from 
+        t_property_contract
+    where
+        id = #{id}
+  </select>
+
+
+  <!-- 添加对物业的监督 -->
+  <insert id="addPropertySupervision" parameterType="com.sikaokeji.owner.framework.domain.Comment" >
+    insert into comment (uid, destination_uid, content, type, all_type_id, content_type, ct,picture,title)
+    values (#{uid}, #{destinationUid}, #{content}, #{type}, #{allTypeId}, #{contentType},#{ct},#{picture},#{title})
+  </insert>
+  
+  <!-- 添加对物业的评论-->
+  <insert id="addPropertyComment" parameterType="com.sikaokeji.owner.framework.domain.Comment" >
+    insert into comment (uid, destination_uid, content, type, all_type_id, content_type, ct,is_reply,score,picture)
+    values (#{uid}, #{destinationUid}, #{content}, #{type}, #{allTypeId}, #{contentType},#{ct},#{isReply},#{score},#{picture})
+  </insert>
+  
+  
+  <!-- 根据条件获取评论-->
+  <select id="findPropertyComment" resultType="com.sikaokeji.owner.framework.domain.Comment" parameterType="com.sikaokeji.owner.framework.domain.Comment">
+    select 
+		id,uid,content,ct,is_reply AS isReply,score,picture
+    from 
+        comment        
+    <where>
+    	<if test="destinationUid!=null and destinationUid!=''">
+    		destination_uid=#{destinationUid}
+    	</if>
+    	<if test="contentType!=null and contentType!=''">
+    		AND content_type = #{contentType}
+    	</if>
+    	<if test="type!=null and type!=''">
+    		 AND type = #{type}
+    	</if>
+    	<if test="isReply!=null and isReply!=''">
+    		and is_reply=#{isReply}
+    	</if>
+    </where>      
+    <if test="1==1">
+    	order by ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>  
+  </select>
+  
+  <!-- 获取物业公司对评价的 反馈 -->
+  <select id="findRePropertyComment" resultType="com.sikaokeji.owner.framework.domain.Comment" parameterType="com.sikaokeji.owner.framework.domain.Comment">
+  	select id,uid,content,picture,ct
+  	from comment
+  	<where>
+  		<if test="destinationUid!=null and destinationUid!=''">
+  			destination_uid=#{destinationUid}
+  		</if>
+  		<if test="contentType!=null and contentType!=''">
+  			AND content_type = #{contentType}
+  		</if>
+  		<if test="type!=null and type!=''">
+  			AND type = #{type}
+  		</if>  		
+  	</where>
+  </select>
+  
+  
+   <!-- 根据条件获取监督列表-->
+  <select id="findPropertySupervision" resultType="com.sikaokeji.owner.framework.domain.Comment" parameterType="com.sikaokeji.owner.framework.domain.Comment">
+    select 
+		id, uid,title,content, is_reply AS isReply, ct,picture		
+    from 
+        comment
+	<where>
+ 		<if test="destinationUid != null">
+ 			DESTINATION_UID = #{destinationUid}
+ 		</if>
+ 		<if test="isReply!=null">
+ 			and is_reply = #{isReply}
+ 		</if>
+ 		<if test="type!=null">
+ 			and type = #{type}
+ 		</if>
+ 		<if test="contentType!=null">
+ 			and CONTENT_TYPE = #{contentType}
+ 		</if>
+ 	</where>
+ 	<if test="1==1">
+	     order by ct desc
+    </if>   
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>           
+  </select>
+  
+  
+  <!-- 根据条件获取对物业的监督详情-->
+  <select id="getSupervisionDetail" resultType="com.sikaokeji.owner.framework.domain.Comment" parameterType="com.sikaokeji.owner.framework.domain.Comment">
+    select 
+		id,uid,content,ct
+    from 
+        comment
+    where
+        id = #{id}
+        AND isDel = #{isDel}
+  </select>
+  
+  
+  <!-- 获取监督处理结果 -->
+  <select id="getSupervisionHandle" resultType="com.sikaokeji.owner.framework.domain.Comment" parameterType="com.sikaokeji.owner.framework.domain.Comment">
+    select 
+		id,uid,content,ct
+    from 
+        comment
+    where
+        isDel = #{isDel}
+        AND destination_uid = #{destinationUid}
+        AND content_type = #{contentType}
+    limit 1
+  </select>
+  
+  
+  <!-- 获取合同监督类型   1：合同监督；2：服务 3：商家类别 4：物业服务等级 5：物业费范围-->
+  <select id="findSupervisionType" resultType="com.sikaokeji.owner.framework.domain.TAllType" parameterType="com.sikaokeji.owner.framework.domain.TAllType">
+    select 
+		id,name
+    from 
+        t_all_type
+    where
+        type = #{type}
+        
+  </select>
+  
+  <!--  -->
+  
+   <!-- 获取物业相关数据分类列表 -->
+  <select id="findDataList" resultType="com.sikaokeji.owner.framework.domain.TPlanType" parameterType="com.sikaokeji.owner.framework.domain.TPlanType">
+    select 
+		id,title,content
+    from 
+        t_plan_type 
+    where 
+         type = #{type}      <!-- 1物业 2居委会 3业委会 4业主代表 5政府  -->
+         AND classification = #{classification} <!-- 分类：1 公示 2 数据  -->
+  </select>
+  
+  <!-- 获取物业数据分类相关数据 -->
+  <select id="findTWorkPlan" resultType="com.sikaokeji.owner.framework.domain.TWorkPlan" parameterType="com.sikaokeji.owner.framework.domain.TWorkPlan">
+    select 
+		id,title,content
+    from 
+        t_work_plan 
+    where
+        uid = #{uid}
+        AND plan_type_id = #{planTypeId}
+  </select>
+  
+  <!-- 获取数据详情 -->
+  <select id="getData" resultType="com.sikaokeji.owner.framework.domain.TWorkPlan" parameterType="com.sikaokeji.owner.framework.domain.TWorkPlan">
+    select 
+		id,title,content
+    from 
+        t_work_plan 
+    where
+        id = #{id}
+  </select>
+  
+  
+  
+  <!-- 业主添加维修（服务）-->
+  <insert id="addRepair" parameterType="com.sikaokeji.owner.framework.domain.TServices" >
+    insert into t_services (need_service_uid, title, content, repair_image_url, repair_uid, all_type_id, ct)
+    values (#{needServiceUid}, #{title}, #{content}, #{repairImageUrl}, #{repairUid}, #{allTypeId},#{ct})
+  </insert>
+  
+  
+  <!-- 添加对服务的评论 -->
+  <insert id="addServiceComment" parameterType="com.sikaokeji.owner.framework.domain.Comment" >
+    insert into comment (uid, destination_uid,type, all_type_id, content_type, content, ct)
+    values (#{uid}, #{destinationUid}, #{type}, #{allTypeId}, #{contentType}, #{content},#{ct})
+  </insert>
+  
+  
+  <!-- 获取报修详情 -->
+  <select id="getRepairDetail" resultType="com.sikaokeji.owner.framework.domain.TServices" parameterType="com.sikaokeji.owner.framework.domain.TServices">
+    select 
+		id,need_service_uid AS needServiceUid, title, content, repair_image_url AS repairImageUrl, repair_uid AS repairUid, all_type_id AS allTypeId,
+		service_person_name AS servicePersonName, service_person_mobile AS servicePersonMobile,repair_person_certificates_url AS repairPersonCertificatesUrl,
+		status,is_comments AS isComments, ct,
+		 (select name from t_all_type ta where ta.id = t.ALL_TYPE_ID) allTypeStr
+    from 
+        t_services t
+    where
+        id = #{id}
+  </select>
+  
+  
+  <!-- 获取业主报修列表 -->
+  <select id="getRepairList" resultType="com.sikaokeji.owner.framework.domain.TServices" parameterType="com.sikaokeji.owner.framework.domain.TServices">
+    select 
+		id,need_service_uid AS needServiceUid, title, content, repair_image_url AS repairImageUrl, repair_uid AS repairUid, all_type_id AS allTypeId,
+		service_person_name AS servicePersonName, service_person_mobile AS servicePersonMobile,repair_person_certificates_url AS repairPersonCertificatesUrl,
+		status,is_comments AS　isComments, ct,
+		 (select name from t_all_type ta where ta.id = t.ALL_TYPE_ID) allTypeStr
+    from 
+        t_services t
+    where
+        need_service_uid = #{needServiceUid}
+    <if test="1==1">
+    	order by ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>
+    
+  </select>
+  
+  
+  <!-- 获取小区的物业 -->
+  <select id="getPropertyCommunity" resultType="com.sikaokeji.owner.framework.domain.TPropertyCompanyDetail" parameterType="java.lang.Long">
+    select 
+		property_uid AS userId
+    from 
+        community
+    where
+        id = #{communityId}
+  </select>
+  
+  
+  <!-- 添加对物业的提问  -->
+  <insert id="addAskQuestion" parameterType="com.sikaokeji.owner.framework.domain.AskQuestion" >
+    insert into ask_question (questioner_uid, questioner_content, questioner_time, answerer_uid, ct)
+    values (#{questionerUid}, #{questionerContent}, #{questionerTime}, #{answererUid}, #{ct})
+  </insert>
+  
+  
+  <!-- 获取物业的提问列表   -->
+  <select id="findAskQuestionByAnswererUid" resultType="com.sikaokeji.owner.framework.domain.AskQuestion" parameterType="com.sikaokeji.owner.framework.domain.AskQuestion">
+    select 
+	 	id,questioner_uid AS questionerUid,questioner_content AS questionerContent,questioner_time AS questionerTime,
+		answerer_uid AS answererUid,status
+    from 
+        ask_question
+    <where>
+		<if test="1==1">
+			questioner_uid=#{questionerUid}	
+		</if>
+		<if test="answererUid!=null and answererUid!=''">
+			and answerer_uid=#{answererUid}
+		</if>
+		<if test="status!=null ">
+			and status=#{status}
+		</if>
+    </where>
+    <if test="1==1">
+    	order by ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>
+   
+  </select>
+  
+  <!-- 获取物业的提问详情   -->
+  <select id="getQuestion" resultType="com.sikaokeji.owner.framework.domain.AskQuestion" parameterType="com.sikaokeji.owner.framework.domain.AskQuestion">
+    select 
+	 	id,questioner_uid AS questionerUid,questioner_content AS questionerContent,questioner_time AS questionerTime,
+		answerer_uid AS answererUid,answerer_content AS answerer_content,answerer_time AS answerer_time,status
+    from 
+        ask_question
+    where
+        id = #{id}
+  </select>
+  
+  <!--获取对物业公司的评价总分和总数  -->
+  <select id="findCountScore"  resultType="hashMap">
+  	select count(id) AS num,sum(score) AS score
+  	from comment   
+	<where>
+		<if test="userId!=null and userId!='' ">
+			destination_uid=#{userId}
+		</if>
+		<if test="1==1">
+			and CONTENT_TYPE=1
+		</if>
+		<if test="1==1">
+			and type=2
+		</if>
+	</where> 
+  </select>
+  
+  <!-- 物业公司查看小区详情 --> 
+  <select id="getCommunityDetail" resultType="com.sikaokeji.owner.framework.domain.Community" parameterType="com.sikaokeji.owner.framework.domain.Community">
+    select  c.id,  	
+ 			c.neighborhood_uid  AS neighborhoodUid,
+ 			c.owners_uid AS ownersUid,
+ 			c.government_uid AS governmentUid,
+			c.name,
+			c.province_id provinceId,
+			c.city_id cityId,
+			c.region_id regionId,
+			c.street,
+			c.area,
+			c.households,
+			c.maxBuildingNumber ,
+			c.maxCellNumber ,
+			c.singlebiggestnumber,
+			c.maxfoors,
+			c.address,
+			c.headPicture as headPicture
+	 from community c
+ 	 where c.id=#{id}
+  </select>
+  
+  <!-- 根据小区的id 律师的id(第三方)  查找律师发的议题列表 -->
+  <select id="findLawyerIssue" parameterType="com.sikaokeji.owner.framework.domain.Issue" resultType="com.sikaokeji.owner.framework.domain.Issue">
+  	select id,originator_uid AS originatorUid,ct,status,AGREE_NUM as agreeNum,
+  		   against_num
+  	from issue
+  	<where>
+  		<if test="communityId!=null and communityId!=''">
+  			community_id = #{communityId}
+  		</if>
+  		<if test="name!=null and name!=''">
+    		and i.name like CONCAT('%','${name}','%')
+   		</if>
+   		<if test="issueTypeId!=null and issueTypeId!=''">
+    		and i.issue_type_id=#{issueTypeId}
+   		</if>
+  		<if test="status!=null">
+  			and status = #{status}
+  		</if>
+  		<if test="actual_originator_uid!=null and actual_originator_uid!=''">
+  			and actual_originator_uid = #{actual_originator_uid}
+  		</if>
+  		<if test="buildingNo != null">
+	    	and i.building_no = #{buildingNo}
+	    </if>
+	    <if test="type != null">
+	    	and i.type = #{type}
+	    </if>   
+  	</where>	   
+  	<if test="1==1">
+    	order by ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>    
+  </select>
+  
+  <!-- 查找小区议题  -->
+  <select id="findCommunityIssue" parameterType="com.sikaokeji.owner.framework.domain.Issue" resultType="com.sikaokeji.owner.framework.domain.Issue">
+  	select id,name,originator_uid AS originatorUid,ct,status,AGREE_NUM as agreeNum,
+  		   against_num
+  	from issue 
+  	<where>
+  		<if test="communityId!=null and communityId!=''">
+  			community_id = #{communityId}
+  		</if>
+  		<if test="name!=null and name!=''">
+    		and name like CONCAT('%','${name}','%')
+   		</if>
+   		<if test="issueTypeId!=null and issueTypeId!=''">
+    		and issue_type_id=#{issueTypeId}
+   		</if>
+   		<if test="originatorUid != null">
+   			and ORIGINATOR_UID = #{originatorUid}
+   		</if>
+  		<if test="status!=null">
+  			and status = #{status}
+  		</if>
+  		<if test="status == null">
+  			and status &gt;4
+  		</if>  		
+  		<if test="buildingNo != null">
+	    	and building_no = #{buildingNo}
+	    </if>
+	    <if test="type != null">
+	    	and type = #{type}
+	    </if>   
+  	</where>	   
+  	<if test="1==1">
+    	order by ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>    
+  </select>
+  
+  <!-- 物业获取对自己的监督列表 -->
+  <!-- <select id="findPropertySupervision" parameterType="com.sikaokeji.owner.framework.domain.Comment" resultType="com.sikaokeji.owner.framework.domain.Comment">
+  	select id,UID,title,content,ct,is_reply AS isReply
+ 	from  comment
+ 	<where>
+ 		<if test="destinationUid != null">
+ 			DESTINATION_UID = #{destinationUid}
+ 		</if>
+ 		<if test="isReply!=null and isReply!=''">
+ 			and is_reply = #{isReply}
+ 		</if>
+ 		<if test="type!=null">
+ 			and type = #{type}
+ 		</if>
+ 		<if test="contentType!=null">
+ 			and CONTENT_TYPE = #{contentType}
+ 		</if>
+ 	</where>
+ 	<if test="1==1">
+	     order by ct desc
+    </if>   
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>   
+  </select>   -->
+  
+  <!-- 物业查找服务列表 -->
+  <select id="findTServiceList" parameterType="com.sikaokeji.owner.framework.domain.TServices" resultType="com.sikaokeji.owner.framework.domain.TServices">
+  	select 
+  		id,NEED_SERVICE_UID AS needServiceUid,title,
+		all_type_id AS allTypeId,ct,status,
+		 (select name from t_all_type ta where ta.id = t.ALL_TYPE_ID) allTypeStr
+	from t_services t
+	<where>
+		<if test="repairUid != null">
+			REPAIR_UID = #{repairUid}
+		</if>
+		<if test="allTypeId !=null and allTypeId!=''">
+			and all_type_id=#{allTypeId}
+		</if>
+		<if test="status != null">
+			and status=#{status}
+		</if>
+	</where>
+	<if test="1==1">
+    	order by ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>	  	
+  </select>  
+  
+  <!-- 查看服务详情 -->
+  <select id="findTServiceDetail" parameterType="com.sikaokeji.owner.framework.domain.TServices" resultType="com.sikaokeji.owner.framework.domain.TServices"> 
+	select t.id,NEED_SERVICE_UID AS
+		needServiceUid,title,content,repair_image_url AS repairImageUrl,t.status,
+		repair_uid repairUid,tp.name as servicePersonName,tp.headPicture as
+		repairUidPicture,
+		tp.mobile AS servicePersonMobile,repair_person_certificates_url AS
+		repairPersonCertificatesUrl,
+		all_type_id AS allTypeId,t.ct
+	from t_services t
+	left join t_work_plan_person tp on t.SERVICE_PERSON_ID = tp.id
+	<where>
+		<if test="id!=null and id!=''">
+			t.id=#{id}
+		</if>
+	</where>	   
+	order by t.ct desc
+  </select>
+ 
+ <!-- 处理服务 -->  
+  <update id="updateTService" parameterType="com.sikaokeji.owner.framework.domain.TServices">
+  	update t_services
+  	set SERVICE_PERSON_ID = #{SERVICE_PERSON_ID},
+  		et = #{et},
+  		status = #{status}
+  	where id = #{id}	
+  </update>
+  
+  <!-- 申请是否设置评价 -->
+   <insert id="addApplication" parameterType="com.sikaokeji.owner.framework.domain.Application" >
+    insert into application ( uid, type, 
+      open_or_close, title, content, 
+      picture,status, ct,communityid
+      )
+    values ( #{uid,jdbcType=BIGINT}, #{type,jdbcType=INTEGER}, 
+      #{openOrClose,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, 
+      #{picture,jdbcType=VARCHAR},#{status,jdbcType=INTEGER}, #{ct,jdbcType=BIGINT},#{communityid}
+      )
+  </insert>
+  <!--新增一条合同  -->
+    <insert id="addContract" parameterType="com.sikaokeji.owner.framework.domain.TPropertyContract">
+	    insert into t_property_contract (PRO_UID, TITLE, 
+	      CONTENT,  CT, 
+	      picture)
+	    values (#{proUid,jdbcType=BIGINT}, #{title,jdbcType=VARCHAR}, 
+	      #{content,jdbcType=VARCHAR}, #{ct,jdbcType=BIGINT}, 
+	      #{picture,jdbcType=VARCHAR})
+  </insert>
+  
+  <!-- 查找所有的项目部 -->
+  <select id="getCommunity" resultType="com.sikaokeji.owner.framework.domain.TpropertyGrade">
+	select a.* from (
+			select * from t_property_grade where id not in(
+							select pid from t_property_grade)and role =4
+			)a 
+	where a.id in (
+				select id from t_property_grade where FIND_IN_SET(id, getChildLst(#{id}))
+		    	)
+  </select>
+  
+  <!--登录时查找子级物业公司的角色  -->
+  <select id="getPropertyRole" resultType="com.sikaokeji.owner.framework.domain.TpropertyGrade"  parameterType="com.sikaokeji.owner.framework.domain.TpropertyGrade">
+  	select t.id,t.pid,t.name,t.role,t.uid ,c.name as communityName,c.id as communityId,
+  			c.address as communityAddress,c.street as communityStreet,c.headPicture as communityHeadP 
+  	from t_property_grade t
+  	left join community c on t. uid = c.property_uid 
+  	where t.pid = (select id from t_property_grade where uid = #{uid})
+  	<if test="communityName != null and communityName !=''">
+  		and c.name like CONCAT('%','${communityName}','%')
+  	</if>  	  	
+  	<if test="name !=null and name !=''">
+  		and t.name like CONCAT('%','${name}','%')
+  	</if>
+  	<if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if> 
+  </select>
+  
+  <!-- 登陆时查找自己的角色 -->
+  <select id="getTgradeRole" parameterType="com.sikaokeji.owner.framework.domain.TpropertyGrade" resultType="com.sikaokeji.owner.framework.domain.TpropertyGrade"> 
+  	select t.id,t.pid,t.name,t.role,t.uid ,c.name as communityName,c.id as communityId,
+  			c.address as communityAddress,c.street as communityStreet,c.headPicture as communityHeadP 
+  	from t_property_grade t
+  	left join community c on t. uid = c.property_uid 
+  	where t.id = (select id from t_property_grade where uid = #{uid})  	
+  
+  </select>
+  
+  <!-- 查找物业公司所负责的小区id -->
+  <select id="findCommunityId" parameterType="string" resultType="string">
+  	select id 
+  	from community
+  	where property_uid = #{uid}
+  </select>
+  
+  <!-- 查看自己的报告列表 -->
+   <select id="getPropertyReportList" parameterType="com.sikaokeji.owner.framework.domain.PropertyReport"  resultType="com.sikaokeji.owner.framework.domain.PropertyReport">
+   	select	p.id, p.reportid,  p.content, p.picture, p.status, p.ct,t.name as reportname
+   	from property_report p
+   	left join t_property_grade t on p.reportid = t.uid
+   	<where>
+   		<if test="reportid != null">
+   			p.reportid = #{reportid}
+   		</if>
+   		<if test="status != null">
+   			and p.status = #{status}
+   		</if>   		
+   		<if test="1==1">
+   			and p.isdel = 0
+   		</if>
+   	</where>
+   	<if test="1==1">
+   		order by p.ct desc
+   	</if>
+   	<if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if> 
+   </select>
+    
+  <!-- 查看汇报问题的详情 -->
+  <select id="findReportDetail" parameterType="com.sikaokeji.owner.framework.domain.PropertyReport"  resultType="com.sikaokeji.owner.framework.domain.PropertyReport">
+  	select	p.id, p.reportid,  p.content, p.picture, p.status, p.ct,p.et,
+  			p.replycontent,p.replypicture ,
+ 	 		t.name as reportname,t2.name as responsiblename
+   	from property_report p
+   	left join t_property_grade t on p.reportid = t.uid
+   	left join t_property_grade t2 on p.responsibleid = t2.uid
+   	where p.id = #{id}
+  </select>
+  
+  <!-- 新增汇报时查找上级信息 -->
+  <select id="getPropertyGradeUid" parameterType="com.sikaokeji.owner.framework.domain.TpropertyGrade" resultType="com.sikaokeji.owner.framework.domain.TpropertyGrade">
+  	select id,uid,name 
+  	from t_property_grade
+  	where id = (select pid from t_property_grade where uid = #{uid})
+  </select>
+  <!-- 新增汇报 -->
+  <insert id="addPropertyReport" parameterType="com.sikaokeji.owner.framework.domain.PropertyReport">
+  	insert into property_report (reportid, responsibleid, 
+      content, picture, 
+      ct)
+    values ( #{reportid,jdbcType=BIGINT}, #{responsibleid,jdbcType=BIGINT}, 
+      #{content,jdbcType=VARCHAR}, #{picture,jdbcType=VARCHAR},  
+      #{ct,jdbcType=BIGINT})
+  </insert>
+  
+  <!--查看下级汇报时 查找下级列表  -->
+  <select id="findChildList" parameterType="com.sikaokeji.owner.framework.domain.TpropertyGrade" resultType="com.sikaokeji.owner.framework.domain.TpropertyGrade">
+  	select id,uid,name
+  	from t_property_grade
+  	<where>
+  		<if test="uid != null">
+  			pid = (select id from t_property_grade where uid = #{uid})
+  		</if>
+  		<if test="name != null">
+  			and name like CONCAT('%','${name}','%')
+  		</if>
+  	</where>
+  </select>
+  
+  <!-- 回复下级汇报的问题 -->
+  <update id="updatePropertyReport" parameterType="com.sikaokeji.owner.framework.domain.PropertyReport">
+  	update property_report
+  		set replycontent = #{replycontent},
+  			replypicture = #{replypicture},
+  			et = #{et},
+  			status = #{status}
+  	where id = #{id}		
+  </update>
+  
+  <!-- 查看物业是否接受评价接口 -->
+  <select id="">
+  	
+  </select>
+  
+</mapper>

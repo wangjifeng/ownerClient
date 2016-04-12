@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.NeighborhoodCommitteeDAO" >
+ 
+  
+
+
+	   <!-- 添加对居委会的评论  -->
+	  <insert id="addComment" parameterType="com.sikaokeji.owner.framework.domain.Comment" >
+	    insert into comment (uid, destination_uid, type,  content_type, content, ct)
+	    values (#{uid}, #{destinationUid}, #{type},  #{contentType}, #{content},#{ct})
+	  </insert>
+  
+	  <!-- 获取对居委会的评论  -->
+	  <select id="findComment" resultType="com.sikaokeji.owner.framework.domain.Comment" parameterType="com.sikaokeji.owner.framework.domain.Comment">
+	    select 
+	    	uid, destination_uid AS destinationUid, type, content_type AS contentType, content, ct
+	    from 
+	       comment 
+	    where 
+		   destination_uid = #{destinationUid}
+		   AND type = #{type}
+		   AND content_type = #{contentType}
+		   AND isDel = #{isDel}
+		<if test="1==1">
+	    	order by ct desc
+	    </if>
+	    <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>
+	   
+	  </select>
+	
+	<!-- 居委会 获取管辖的小区列表 -->	  
+  <select id="findResponseCommunity" parameterType="com.sikaokeji.owner.framework.domain.TNeighborhoodCommitteeDetail" resultType="com.sikaokeji.owner.framework.domain.Community">
+  	select id,name,headPicture,street,address
+  	from community
+  	<where>
+  		<if test="userId !=null">
+  			id in (
+  				select responsible_id 
+  				from mid_table
+  				where responsible_uid = #{userId}
+  				and type = 7
+  			)
+  		</if>
+  	</where>
+  </select>    
+  
+   <!-- 根据小区id获取小区详情 -->
+  <select id="getCommunityDetail" resultType="com.sikaokeji.owner.framework.domain.Community" parameterType="com.sikaokeji.owner.framework.domain.Community">
+    select  c.id,  	
+ 			c.owners_uid AS ownersUid,
+ 			c.government_uid AS governmentUid,
+ 			c.property_uid AS propertyUid,
+			c.name,
+			c.province_id provinceId,
+			c.city_id cityId,
+			c.region_id regionId,
+			c.street,
+			c.area,
+			c.households,
+			c.maxBuildingNumber ,
+			c.maxCellNumber ,
+			c.singlebiggestnumber,
+			c.maxfoors,
+			c.address,
+			c.headPicture,
+			c.introduction  
+	 from community c
+ 	 where c.id=#{id}
+  </select>
+  
+  <!-- 居委会获取建议意见列表 -->
+  <select id="findAdvice" parameterType="com.sikaokeji.owner.framework.domain.Advice" resultType="com.sikaokeji.owner.framework.domain.Advice">
+  	select  id, proponentuid, responseuid, content, ct, et, isdel
+  	from advice
+    where responseuid = #{responseuid,jdbcType=INTEGER}
+    and isdel = 0
+   	order by ct desc
+   	<if test="pageNum!=null ">
+	   limit #{pageNum},#{pageSize}
+	</if>
+  </select>
+  
+
+  
+  
+</mapper>

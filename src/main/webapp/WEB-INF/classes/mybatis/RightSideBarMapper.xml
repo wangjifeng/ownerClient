@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.RightSideBarDAO" >
+	
+	<resultMap id="BaseResultMap" type="com.sikaokeji.owner.framework.domain.Issue" >
+	    <id column="ID" property="id" jdbcType="BIGINT" />
+	    <result column="NAME" property="name" jdbcType="VARCHAR" />
+	    <result column="ISSUE_TYPE_ID" property="issueTypeId" jdbcType="BIGINT" />
+	    <result column="MONEY" property="money" jdbcType="DOUBLE" />
+	    <result column="COMMUNITY_ID" property="communityId" jdbcType="BIGINT" />
+	    <result column="ORIGINATOR_UID" property="originatorUid" jdbcType="BIGINT" />
+	    <result column="WORK_END_TIME" property="workEndTime" jdbcType="BIGINT" />
+	    <result column="VOTE_END_TIME" property="voteEndTime" jdbcType="BIGINT" />
+	    <result column="FIRST_UID" property="firstUid" jdbcType="BIGINT" />
+	    <result column="SECOND_UID" property="secondUid" jdbcType="BIGINT" />
+	    <result column="THIRD_UID" property="thirdUid" jdbcType="BIGINT" />
+	    <result column="MONITORS_UID" property="monitorsUid" jdbcType="BIGINT" />
+	    <result column="DAY_NUM" property="dayNum" jdbcType="INTEGER" />
+	    <result column="votePersonNum" property="votePersonNum" jdbcType="INTEGER" />
+	    <result column="ownerNum" property="ownerNum" jdbcType="INTEGER" />
+	    <result column="AGREE_NUM" property="agreeNum" jdbcType="DOUBLE" />
+	    <result column="AGREE_AREA" property="agreeArea" jdbcType="DOUBLE" />
+	    <result column="WORK_DAY_NUM_TYPE" property="workDayNumType" jdbcType="INTEGER" />
+	    <result column="STATUS" property="status" jdbcType="INTEGER" />
+	    <result column="ISDEL" property="isDel" jdbcType="INTEGER" />
+	    <result column="CT" property="ct" jdbcType="BIGINT" />
+	    <result column="ET" property="et" jdbcType="BIGINT" />
+	    <result column="IS_ARREARS" property="isArrears" jdbcType="INTEGER" />
+  </resultMap>
+	
+	<!-- 查找右侧边栏数据 -->	  
+	 <select id="findRightSideBar" parameterType="com.sikaokeji.owner.framework.domain.Community" resultType="com.sikaokeji.owner.framework.domain.Community">
+	 	select  c.id,  	
+	 			c.neighborhood_uid  AS neighborhoodUid,
+	 			c.owners_uid AS ownersUid,
+	 			c.government_uid AS governmentUid,
+	 			c.property_uid AS propertyUid,
+				c.name,
+				c.province_id provinceId,
+				c.city_id cityId,
+				c.region_id regionId,
+				c.street,
+				c.area,
+				c.households,
+				c.maxBuildingNumber ,
+				c.maxCellNumber ,
+				c.singlebiggestnumber,
+				c.maxfoors,
+				c.address
+ 		 from community c
+		 where c.id=#{id}
+	 </select> 
+	
+	 
+	 <!-- 获取居委会所在表 -->
+	 <select id="findtneighborhoodtable" parameterType="com.sikaokeji.owner.framework.domain.TNeighborhoodCommitteeDetail" resultType="com.sikaokeji.owner.framework.domain.TNeighborhoodRouting">
+	 	select table_name as tableName
+	 	from t_neighborhood_routing
+	 	where user_id=#{userId} 
+	 </select>	 
+	 <!--获取居委会的详细情况  -->
+	 <select id="findtneighborhood" parameterType="com.sikaokeji.owner.framework.domain.TNeighborhoodCommitteeDetail" resultType="com.sikaokeji.owner.framework.domain.TNeighborhoodCommitteeDetail">
+	 	select headPicture,name,address,introduction,backgroundPicture
+	 	from ${tableName}
+	 	where user_id=#{userId}
+	 </select>
+	 
+	 <!-- 获取业委会所在表 -->
+	 <select id="findOwnersCommitteeRouting" parameterType="com.sikaokeji.owner.framework.domain.TOwnersCommitteeDetail" resultType="com.sikaokeji.owner.framework.domain.TOwnersCommitteeRouting">
+	 	select table_name as tableName
+	 	from t_owners_committee_routing
+	 	where  user_id=#{userId}
+	 </select>
+	 <!--获取业委会的详细信息  -->
+	 <select id="findTOwnersCommitteeDetail" parameterType="com.sikaokeji.owner.framework.domain.TOwnersCommitteeDetail" resultType="com.sikaokeji.owner.framework.domain.TOwnersCommitteeDetail">
+	 	select headPicture,name,address,introduction,accountlimit,daynum,backgroundPicture
+	 	from ${tableName}
+	 	where user_id=#{userId}
+	 </select>
+	 
+	 <!--获取政府所在表  -->
+	 <select id="findTGovernmentRouting" parameterType="com.sikaokeji.owner.framework.domain.TGovernmentDetail" resultType="com.sikaokeji.owner.framework.domain.TGovernmentRouting">
+	 	select table_name tableName
+	 	from t_government_routing
+	 	where user_id=#{uid}
+	 </select>
+	 <!-- 获取政府信息 -->
+	 <select id="findTGovernmentDetail" parameterType="com.sikaokeji.owner.framework.domain.TGovernmentDetail" resultType="com.sikaokeji.owner.framework.domain.TGovernmentDetail">
+	 	select headPicture,name,address,introduction,backgroundPicture
+	 	from ${tableName}
+	 	where uid=#{uid}
+	 </select>
+	 <!--获取物业所在表  -->
+	 <select id="findTPropertyRouting" parameterType="com.sikaokeji.owner.framework.domain.TPropertyRouting" resultType="com.sikaokeji.owner.framework.domain.TPropertyRouting">
+	 	select table_name tableName
+	 	from t_property_routing
+	 	where user_id=#{userId}
+	 </select>
+	 <!-- 获取物业信息 -->
+	 <select id="findTPropertyDetail" parameterType="com.sikaokeji.owner.framework.domain.TPropertyCompanyDetail" resultType="com.sikaokeji.owner.framework.domain.TPropertyCompanyDetail">
+	 	select headPicture,NAME as name,INTRODUCTION as introduction,address,backgroundPicture
+	 	from ${tableName}
+	 	where USER_ID=#{userId}
+	 </select>
+	 
+	 <!-- 首页滚动最新告示10条 -->
+	 <select id="findTenSignMessage" parameterType="com.sikaokeji.owner.framework.domain.SignMessage" resultType="com.sikaokeji.owner.framework.domain.SignMessage">
+	 	select id,title,content,start_time,ct
+	 	from sign_message
+	 	<where>
+	 		<if test="communityId!=null and communityId!=''">
+	 			community_id=#{communityId}
+	 		</if>
+	 		<if test="plan_type!=null and plan_type!=''">
+	 			and t_plan_type=#{plan_type}
+	 		</if>
+	 		<if test="uid!=null and uid!=''">
+	 			and UID=#{uid}
+	 		</if>
+	 		<if test="end_time!=null and end_time!=''">
+	 			and end_time&gt;=#{end_time}
+	 		</if>
+	 	</where>	 	
+	 	order by ct desc
+	 	limit 0,10
+	 </select>
+	 
+	 <!--获取告示的信息列表    <if test="end_time!=null and end_time!=''">	and end_time&gt;=#{end_time}</if>-->
+	 <select id="findSignMessage" parameterType="com.sikaokeji.owner.framework.domain.SignMessage" resultType="com.sikaokeji.owner.framework.domain.SignMessage">
+	 	select id,uid,title,content,start_time,end_time,ct
+	 	from sign_message
+	 	<where>
+	 		<if test="communityId!=null and communityId!=''">
+	 			community_id=#{communityId}
+	 		</if>
+	 		<if test="plan_type!=null and plan_type!=''">
+	 			and t_plan_type=#{plan_type}
+	 		</if>
+	 		<if test="uid!=null and uid!=''">
+	 			and UID=#{uid}
+	 		</if>	 
+	 		<if test="uids!=null and uids!=''">
+ 				and uid in (${uids})
+ 			</if>		
+ 			<if test="1==1">
+ 				and isdel = 0
+ 			</if>
+	 	</where>	 	
+	 	<if test="1==1">
+	    	order by ct desc
+	    </if>
+	    <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>	  
+	 </select>
+	 <!-- 获取公示的详细信息 -->	
+	 <select id="findSignMessageDetail" parameterType="com.sikaokeji.owner.framework.domain.SignMessage" resultType="com.sikaokeji.owner.framework.domain.SignMessage">
+	 	select id,uid,title,content,start_time,end_time,ct
+	 	from sign_message
+	 	where
+	 		id=#{id}
+	 </select>
+	 <!--添加公示  -->
+	 <insert id="addSignMessage" parameterType="com.sikaokeji.owner.framework.domain.SignMessage">
+	 	insert into sign_message (uid,title,t_plan_type,COMMUNITY_ID,CONTENT,CT,start_time,end_time,ISDEL)
+	 					values(#{uid},#{title},#{plan_type},#{communityId},#{content},#{ct},#{start_time},#{end_time},0)			
+	 </insert>
+	 <!-- 获取提问的信息 -->
+	 <select id="OLDfindAskQuestion" parameterType="com.sikaokeji.owner.framework.domain.AskQuestion" resultType="com.sikaokeji.owner.framework.domain.AskQuestion">
+	 	select id,questioner_uid AS  questionerUid,	 		   			   
+	 		   questioner_content AS questionerContent,
+	 		   questioner_time AS questionerTime,
+	 		   answerer_uid AS answererUid,
+	 		   answerer_content,
+	 		   answerer_time,
+	 		   status
+	 	from ask_question 
+	 	<where>
+	 		<if test="1==1">
+	 			questioner_uid=#{questionerUid}	
+	 		</if>
+	 		<if test="answererUid!=null and answererUid!=''">
+	 			and answerer_uid=#{answererUid}
+	 		</if>
+	 		<if test="status!=null ">
+	 			and status=#{status}
+	 		</if>
+	 	</where>
+	 	<if test="1==1">
+    	 order by ct desc
+	    </if>
+	    <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>
+	   
+	 </select>
+	 <!-- 获得提问信息(此方法只在业主端使用) -->
+	 <select id="findAskQuestion" parameterType="com.sikaokeji.owner.framework.domain.AskQuestion" resultType="com.sikaokeji.owner.framework.domain.AskQuestion">
+	 	(select id,questioner_uid AS  questionerUid,	 		   			   
+	 		   questioner_content AS questionerContent,
+	 		   questioner_time AS questionerTime,
+	 		   answerer_uid AS answererUid,
+	 		   answerer_content,
+	 		   answerer_time,
+	 		   status,
+	 		   ct
+	 	from ask_question 
+	 	<where>
+	 		<if test="1==1">
+	 			questioner_uid=#{questionerUid}	
+	 		</if>
+	 		<if test="answererUid!=null and answererUid!=''">
+	 			and answerer_uid=#{answererUid}
+	 		</if>
+	 		<if test="status!=null ">
+	 			and status=#{status}
+	 		</if>
+	 	</where>) union all
+	 	(select id,questioner_uid AS  questionerUid,	 		   			   
+	 		   questioner_content AS questionerContent,
+	 		   questioner_time AS questionerTime,
+	 		   answerer_uid AS answererUid,
+	 		   answerer_content,
+	 		   answerer_time,
+	 		   status,
+	 		   ct
+	 	from ask_question 
+	 	<where>
+	 		<if test="1==1">
+	 			questioner_uid!=#{questionerUid}	
+	 		</if>
+	 		<if test="answererUid!=null and answererUid!=''">
+	 			and answerer_uid=#{answererUid}
+	 		</if>
+	 		<if test="status!=null ">
+	 			and status=#{status}
+	 		</if>
+	 		<if test="1==1">
+	 			and isshow=1
+	 		</if>
+	 	</where>)
+	 	<if test="1==1">
+    	     order by ct desc
+	    </if>
+	    <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>
+	   
+	 </select>
+	 
+	 
+	 <!--获取回答用户的角色  -->
+	 <select id="findAnswerRole" resultType="string">
+	 	select role_id 
+	 	from c_role
+	 	where uid=#{answerer_uid}
+	 </select>
+	 
+	 <!--获取回答问题的用户姓名 -->
+	 <select id="findAnswererUidName" resultType="string">
+	 	select 
+	 	<if test="role_id==1">
+	 		name from owner
+	 		where uid=#{answerer_uid}
+	 	</if>
+	 	<if test="role_id==2">
+	 		name from lawyer
+	 		where uid=#{answerer_uid}
+	 	</if>
+	 	<if test="role_id==3">
+	 		name from t_owners_committee_detail
+	 		where user_id=#{answerer_uid}
+	 	</if>
+	 	<if test="role_id==4">
+	 		name from t_oversight_committee_detail
+	 		where user_id=#{answerer_uid}
+	 	</if>
+	 	<if test="role_id==5">
+	 		name from t_property_company_detail
+	 		where user_id=#{answerer_uid}
+	 	</if>
+	 	<if test="role_id==6">
+	 		name from floor_manager
+	 		where uid=#{answerer_uid}
+	 	</if>
+	 	<if test="role_id==7">
+	 		name form t_neighborhood_committee_detail
+	 		where user_id=#{answerer_uid}
+	 	</if>
+	 	<if test="role_id==8">
+	 		name from t_government
+	 		where uid=#{answerer_uid}
+	 	</if>
+	 </select>
+	 
+	 <!-- 提问问题 -->
+	 <insert id="addAskQuestion" parameterType="com.sikaokeji.owner.framework.domain.AskQuestion">
+	 	insert into 
+	 	ask_question (QUESTIONER_UID,questioner_content,questioner_time,answerer_uid,status,ct,isshow)
+	 	values (#{questionerUid},#{questionerContent},#{questionerTime},#{answererUid},0,#{ct},#{isshow})
+	 </insert>
+	 
+	 <!--获取数据分类下拉列表  -->
+	 <select id="findTPlanType" parameterType="com.sikaokeji.owner.framework.domain.TPlanType" resultType="com.sikaokeji.owner.framework.domain.TPlanType">
+	 	select id,title,picture,status,content
+	 	from t_plan_type
+	 	<where>
+	 		<if test="type!=null and type!=''">
+	 			type=#{type}
+	 		</if>
+	 		<if test="classification!=null and classification!=''">
+	 			and classification=#{classification}
+	 		</if>
+	 		
+	 	</where>
+	 </select>
+	 
+	 <!-- 获取数据分类列表 信息-->
+	 <select id="findTworkPlan" parameterType="com.sikaokeji.owner.framework.domain.TWorkPlan" resultType="com.sikaokeji.owner.framework.domain.TWorkPlan">
+	 	select a.* from (
+			 	select t.id,tp.id as personId, t.title,t.content,t.ct,tp.name,
+			 	tp.mobile,tp.introduction,tp.headPicture,tp.position,
+			 	tp.ct as time,
+			 	CASE 
+				when tp.isdel is null then 0
+				when tp.isdel =0 then 0
+				when tp.isdel =1 then 1
+				END isdel
+			 	from   t_work_plan t
+			 	LEFT JOIN t_work_plan_person tp on t.id=tp.workplanid
+			 	<where>
+			 		<if test="planTypeId!=null and planTypeId!=''">
+			 			t.plan_type_id=#{planTypeId}
+			 		</if>
+			 		<if test="uid!=null and uid!=''">
+			 			and t.uid=#{uid}	  
+			 		</if>
+			 		<if test="id!=null and id!=''">
+			 			and t.id=#{id}
+			 		</if>
+			 		<if test="isdel!=null">
+			 			and t.isdel = #{isdel}
+			 		</if>
+			 		
+			 	</where>	 
+			 	union 
+			 	select t.id,tp.id as personId, t.title,t.content,t.ct,tp.name,
+			 	tp.mobile,tp.introduction,tp.headPicture,tp.position,
+			 	tp.ct as time,
+			 	CASE 
+				when tp.isdel is null then 0
+				when tp.isdel =0 then 0
+				when tp.isdel =1 then 1
+				END isdel
+			 	from   t_work_plan t
+			 	LEFT JOIN t_work_plan_person tp on t.id=tp.workplanid
+			 	<where>
+			 		<if test="planTypeId!=null and planTypeId!=''">
+			 			t.plan_type_id=#{planTypeId}
+			 		</if>
+			 		<if test="uid!=null and uid!=''">
+			 			and t.uid=#{uid}	  
+			 		</if>
+			 		<if test="id!=null and id!=''">
+			 			and t.id=#{id}
+			 		</if>
+			 		<if test="isdel!=null">
+			 			and t.isdel = #{isdel}
+			 		</if>
+			 		<if test="1==1">
+			 			and tp.isdel = 0
+			 		</if>
+			 	</where>	 	
+	 		)a
+	 	where isdel = 0	
+	 	<if test="1==1">
+    	     order by a.ct desc,a.time desc
+	    </if>
+	    <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>
+	 </select>
+	 <!-- 删除一条工作计划 -->
+	<update id="updateTworkPlan" parameterType="com.sikaokeji.owner.framework.domain.TWorkPlan">
+		update t_work_plan
+		set isDel = #{isdel},
+			et = #{et}
+		where id = #{id}
+	</update>
+	<!-- 新增一条工作计划 -->
+	<insert id="addTworkPlan" parameterType="com.sikaokeji.owner.framework.domain.TWorkPlan" useGeneratedKeys="true" keyProperty="id">
+		insert into t_work_plan (PLAN_TYPE_ID,UID,TITLE,CONTENT,ct)
+		values 			(#{planTypeId},#{uid},#{title},#{content},#{ct})
+	</insert>
+	<!-- 删除当前工作人员 -->
+	<update id="updateTworkPerson" parameterType="com.sikaokeji.owner.framework.domain.TWorkPlan">
+		update t_work_plan_person
+		set isDel = #{isdel},
+			et	= #{et}
+		where id = #{id}	
+	</update>
+	<!-- 编辑当前工作人员 -->
+	<update id="editTworkPerson" parameterType="com.sikaokeji.owner.framework.domain.TWorkPlan" >
+	    update t_work_plan_person
+	    <set >     
+	      <if test="name != null" >
+	        name = #{name,jdbcType=VARCHAR},
+	      </if>
+	      <if test="mobile != null" >
+	        mobile = #{mobile,jdbcType=VARCHAR},
+	      </if>
+	      <if test="introduction != null" >
+	        introduction = #{introduction,jdbcType=VARCHAR},
+	      </if>
+	      <if test="headPicture != null" >
+	        headPicture = #{headPicture,jdbcType=VARCHAR},
+	      </if>
+	      <if test="isdel != null" >
+	        isDel = #{isdel,jdbcType=INTEGER},
+	      </if>
+	      <if test="ct != null" >
+	        ct = #{ct,jdbcType=BIGINT},
+	      </if>
+	      <if test="et != null" >
+	        et = #{et,jdbcType=BIGINT},
+	      </if>
+	      <if test="position != null" >
+	        position = #{position,jdbcType=VARCHAR},
+	      </if>
+	    </set>
+	    where id = #{id,jdbcType=INTEGER}
+    </update>
+    <!-- 新增工作人员时判断有没有工作计划 -->
+  <!-- 新增一个工作人员 -->
+	<insert id="addTWorkPerson" parameterType="com.sikaokeji.owner.framework.domain.TWorkPlan"  >
+	    insert into t_work_plan_person ( workplanid, name, 
+	      mobile, introduction, headPicture, 
+	      ct, position
+	      )
+	    values (#{workplanid,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, 
+	      #{mobile,jdbcType=VARCHAR}, #{introduction,jdbcType=VARCHAR}, #{headPicture,jdbcType=VARCHAR}, 
+	     #{ct,jdbcType=BIGINT}, #{position,jdbcType=VARCHAR}
+	      )
+   </insert>
+	
+	
+	 <!-- 通过中间表查找负责方的账号id id -->
+	 <select id="findMidtableUid" parameterType="com.sikaokeji.owner.framework.domain.MidTable" resultType="com.sikaokeji.owner.framework.domain.MidTable">
+	 	select responsible_uid from  mid_table 
+	 	where responsible_id=#{responsible_id}
+	 	<if test="type!=null and type!=''">
+	 		and type=#{type}
+	 	</if>
+	 </select>
+	 <!-- 通过第三方路由表 获取表名称  -->
+	 <select id="findTthirdRouting" resultType="hashMap">
+	 	select user_id,table_name
+	 	from t_third_routing
+	 	where user_id
+	 	in 
+	 	<foreach item="arr" index="index" collection="array" 
+                         open="(" separator="," close=")">
+						#{arr}
+		</foreach>
+	 	
+	 </select>	
+	 <!-- 查找所有的第三方表 -->
+	 <select id="findTthirdTable" resultType="string">
+	 	select distinct table_name
+	 	from t_third_routing
+	 </select>
+	 <!-- 查询所有的第三方信息 -->
+	 <select id="findThird" parameterType="com.sikaokeji.owner.framework.domain.ThirdPartyInstitution" resultType="com.sikaokeji.owner.framework.domain.ThirdPartyInstitution">
+		 select a.* from (	
+			 	select id,uid,name,mobile,picture,headPicture as headPicture,address,introduction,isdel
+			 	from ${tableName}
+			 	<where>
+			 		<if test="mobile !=null">
+			 			MOBILE = #{mobile}
+			 		</if>
+			 	</where>
+			 	<if test="bianhao != null">
+					<foreach collection="bianhao" index="index" item="bianhao" open="" separator="union" close="">
+			          union  
+			          select id,uid,name,mobile,picture,headPicture as headPicture,address,introduction,isdel
+					  from ${bianhao} 	        
+					  <where>
+				 		<if test="mobile !=null">
+				 			MOBILE = #{mobile}
+				 		</if>
+				 	 </where>            
+			        </foreach>	
+				</if>
+		 )a
+		 where a.isdel = 0	
+		 <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>		 
+	 </select>
+	 
+	 
+	 <!-- 查询第三方信息 -->
+	 <select id="findThird_party_institution" resultType="com.sikaokeji.owner.framework.domain.ThirdPartyInstitution" >
+	 	select id,uid,name,mobile,picture,headPicture,address,introduction
+	 	from ${table_name}
+	 	where uid=#{user_id}
+	 </select>
+	 
+	 <!-- 授权人为楼长时 精确查找楼长 -->
+	 <select id="findAuthorizeFloorM" parameterType="com.sikaokeji.owner.framework.domain.FloorManager" resultType="com.sikaokeji.owner.framework.domain.FloorManager">
+	 	select id,uid,name 
+	 	from floor_manager
+	 	<where>
+	 		<if test="community_id !=null and community_id!=''">
+	 			community_id =#{community_id}
+	 		</if>
+	 		<if test="floor_id !=null and floor_id !=''">
+	 			and floor_id =#{floor_id}
+	 		</if>
+	 		<if test="mobile!=null and mobile!=''">
+	 			and mobile = #{mobile}
+	 		</if>
+	 	</where>
+	 </select>
+	 <!-- 查找所有的业主表 -->
+	 <select id="findOwnerTable" resultType="string">
+	 	select distinct table_name from t_owner_routing
+	 </select>
+	 
+	 <!-- 通过律师路由表 获取表名称  -->
+	 <select id="findTlawyerRouting" resultType="hashMap">
+	 	select user_id,table_name
+	 	from t_lawyer_routing
+	 	where user_id
+	 	in 
+	 	<foreach item="arr" index="index" collection="array" 
+                         open="(" separator="," close=")">
+						#{arr}
+		</foreach>
+	 	
+	 </select>	
+	 
+	 
+	 
+	 <!-- 查找所有的律师表 -->
+	 <select id="findLawyerTable" resultType="string">
+	 	select distinct table_name from t_lawyer_routing
+	 </select>
+	 <!-- 授权人为律师时 通过手机号精确查找小区的某个律师 -->
+	 <select id="findAuthorizeLawyer" parameterType="com.sikaokeji.owner.framework.domain.Lawyer" resultType="com.sikaokeji.owner.framework.domain.Lawyer">
+	 	select id,uid,name,headPicture,mobile,introduction
+	 	from ${tableName}
+	 	<where>
+			<if test="mobile!=null and mobile!=''">
+				mobile=#{mobile}
+			</if>
+			<if test="name!=null and name!=''">
+				and name=#{name}
+			</if>
+			<if test="uid!=null and uid!=''">
+			   and uid=#{uid}
+			</if>
+		</where>	
+	 </select>
+	<!-- 授权人为业主时 通过手机号精确查找小区的某个业主 -->
+	<select id="findAuthorizeOwner" parameterType="com.sikaokeji.owner.framework.domain.Owner" resultType="com.sikaokeji.owner.framework.domain.Owner">
+		select id,uid,headPicture, name,mobile
+		from ${tableName}
+		<where>
+			<if test="mobile!=null and mobile!=''">
+				mobile=#{mobile}
+			</if>
+			<if test="name!=null and name!=''">
+				and name=#{name}
+			</if>			
+		</where>		
+	</select>
+	 <!-- 查找一个小区的业主代表 -->
+	 <select id="findOwnerBehalf" parameterType="com.sikaokeji.owner.framework.domain.Owner" resultType="com.sikaokeji.owner.framework.domain.Owner">
+	 	select id,headPicture, name,mobile,address,institution
+	 	from ${tableName}
+	 	where isbehalf='1'
+	 	and community_id=#{communityId}
+	 </select>
+	 <!-- 查找业主代表所 代表的议题列表 -->
+	 <select id="findOwnerBehalfIssue" resultType="com.sikaokeji.owner.framework.domain.Issue" parameterType="com.sikaokeji.owner.framework.domain.Issue">
+		 select id,name,status
+		 from issue 
+		 where id in(
+		 		select issue_id from authorize where authorized_uid=#{id})
+	 </select>
+	
+	 <!--获取议题的类型  参看IssueMapper.xml 的getAllIssueType  -->
+	 
+	 <!-- 查看已经到了后续工作的议题列表 -->
+	 <select id="findFollowIssue" parameterType="com.sikaokeji.owner.framework.domain.Issue" resultMap="BaseResultMap">
+	 	select id,name,money,originator_uid,vote_end_time,first_uid,second_uid,third_uid,ct, et
+	 	from issue
+	 	<where>
+	 		<if test="communityId!=null and communityId!=''">
+	 			community_id=#{communityId}
+	 		</if>
+	 		<if test="issueTypeId!=null and issueTypeId!=''">
+	 			and issue_type_id=#{issueTypeId}
+	 		</if>
+	 		<if test="1==1">
+	 			and status in (6,7)
+	 		</if>
+	 		<if test="buildingNo != null">
+		    	and i.building_no = #{buildingNo}
+		    </if>
+		    <if test="type != null">
+		    	and i.type = #{type}
+		    </if>   
+	 		<if test="firstUid!=null and firstUid!=''">
+	 			and first_uid=#{firstUid}
+	 		</if>
+	 	</where>	
+	 	<if test="1==1">
+	    	order by ct desc
+	    </if>
+	    <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>
+	  
+	 </select>	 
+	 <!-- 获取某个议题的所有的后续工作列表 -->
+	 <select id="findFollwWork" resultType="com.sikaokeji.owner.framework.domain.FollowWork" parameterType="com.sikaokeji.owner.framework.domain.FollowWork">
+	 	select f.id,f.uid,f.content,f.ct,f.amount,a.is_examine 
+	 	from follow_work f
+	 	left join account_detail a on f.account_detail_id=a.id
+	 	<where>	 		
+	 		<if test="issueId!=null and issueId!=''">
+	 			 issue_id=#{issueId}
+	 		</if>
+	 	</where>
+	 	<if test="1==1">
+	    	order by f.ct desc
+	    </if>
+	    <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>
+	   
+	 </select>
+	 
+	 
+	 <!-- 为某个议题添加后续工作 -->
+	 <insert id="addFollowWork" parameterType="com.sikaokeji.owner.framework.domain.FollowWork" >
+	 	insert into follow_work(issue_id,uid,content,amount,ct,account_detail_id)
+	 	values (#{issueId},#{uid},#{content},#{amount},#{ct},#{account_detail_id})
+	 </insert>
+	 
+	 <!--查找议题需要的金额  -->
+	 <!-- <select id="findIssueMoney"  resultType="bigDecimal">
+	 	select money
+	 	from issue
+	 	<where>
+	 		<if test="id!=null and id!=''">
+	 			id=#{id}
+	 		</if>
+	 	</where>
+	 </select> -->
+	 <select id="findIssueMoney" resultType="com.sikaokeji.owner.framework.domain.Account" >
+	 	select id,amount 
+	 	from account
+	 	where uid=#{id}
+	 </select>
+	 
+	 <!-- 添加后续工作时增加一条流水记录 -->
+	 <insert id="addAccountDetail"  useGeneratedKeys="true" keyProperty="id" parameterType="com.sikaokeji.owner.framework.domain.AccountDetail">
+	 	insert into 
+	 			account_detail(account_pay_id,account_id,
+	 							PURPOSE,type,flow_amount,
+	 							account_balance,STATUS,ct,
+	 							is_examine,ISDEL)
+	 			values(#{accountPayId},#{accountId},
+	 					7,1,#{flowAmount},
+	 					#{accountBalance},0,#{ct},
+	 					0,0)				
+	 </insert>
+	 
+	 <!-- 查找所有的律师表 -->
+	 <select id="findAllLawyerTable" resultType="com.sikaokeji.owner.framework.domain.Lawyer">
+	 	select distinct table_name AS tableName
+	 	from  t_lawyer_routing
+	 </select>
+	 <!-- 查找平台律师 -->
+	 <select id="findCooperationLawyer" resultType="com.sikaokeji.owner.framework.domain.Lawyer"  parameterType="com.sikaokeji.owner.framework.domain.Lawyer" >
+	 	select id,uid,name,headPicture,mobile,introduction,cooperation
+	 	from ${tableName}
+	 	<where>
+			<if test="mobile!=null and mobile!=''">
+				mobile=#{mobile}
+			</if>
+			<if test="name!=null and name!=''">
+				and name=#{name}
+			</if>
+			<if test="uid!=null and uid!=''">
+			   and uid=#{uid}
+			</if>
+			<if test="cooperation!=null and cooperation!=''">
+				and cooperation=#{cooperation}
+			</if>
+		</where>	
+		<if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>	 
+	 </select>
+	 
+	 <!-- 获取告示的下拉框数据        居委会  业委会  政府  物业-->
+	 <select id="findSignDownData" parameterType="com.sikaokeji.owner.framework.domain.Community" resultType="com.sikaokeji.owner.framework.domain.Community">
+	 	select	c.neighborhood_uid  AS neighborhoodUid,
+	 			c.owners_uid AS ownersUid,
+	 			c.government_uid AS governmentUid,
+	 			c.property_uid AS propertyUid
+	 	from community c
+	 	where c.id=#{id}
+	 </select>
+	 <!--获取告示下拉框数据  第三方和 律师 -->
+	 <select id="findNextSignDownData" parameterType="com.sikaokeji.owner.framework.domain.MidTable" resultType="com.sikaokeji.owner.framework.domain.MidTable">
+	 	select responsible_uid 
+	 	from mid_table 
+	 	where responsible_id = #{responsible_id}
+	 	and type = #{type}
+	 </select>
+	 
+	 
+	 
+</mapper>

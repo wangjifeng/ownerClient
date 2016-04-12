@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.OwnersCommitteeDAO" >
+ 
+  
+  <!-- 获取集资列表 -->
+  <select id="findRaiseFunds" resultType="com.sikaokeji.owner.framework.domain.Issue" parameterType="com.sikaokeji.owner.framework.domain.Issue">
+    select 
+     id,name,status,ct,vote_end_time AS voteEndTime 
+    from 
+       issue 
+    where 
+	   originator_uid = #{originatorUid}
+	   AND classification = #{classification}
+  </select>
+  
+
+
+
+  
+   <!-- 获取募捐列表 -->
+  <select id="findDonation" resultType="com.sikaokeji.owner.framework.domain.Issue" parameterType="com.sikaokeji.owner.framework.domain.Issue">
+    select 
+     id,name,status,ct,vote_end_time AS voteEndTime 
+    from 
+       issue 
+    where 
+	   originator_uid = #{originatorUid}
+	   AND classification = #{classification}
+  </select>
+ 	
+  <!-- 添加对业委会的评论  -->
+  <insert id="addComment" parameterType="com.sikaokeji.owner.framework.domain.Comment" >
+    insert into comment (uid, destination_uid, type,  content_type, content, ct)
+    values (#{uid}, #{destinationUid}, #{type},  #{contentType}, #{content},#{ct})
+  </insert>
+  
+  <!-- 获取对业委会的评论  -->
+  <select id="findComment" resultType="com.sikaokeji.owner.framework.domain.Comment" parameterType="com.sikaokeji.owner.framework.domain.Comment">
+    select 
+    	uid, destination_uid AS destinationUid, type, content_type AS contentType, content, ct
+    from 
+       comment 
+    where 
+	   destination_uid = #{destinationUid}
+	   AND type = #{type}
+	   AND content_type = #{contentType}
+	<if test="1==1">
+    	order by ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>
+   
+  </select>
+  
+  
+  <!-- 业委会 获取小区详情接口 -->
+  <select id="getCommunityDetail" resultType="com.sikaokeji.owner.framework.domain.Community" parameterType="com.sikaokeji.owner.framework.domain.Community">
+    select  c.id,  	
+ 			c.neighborhood_uid  AS neighborhoodUid,
+ 			c.property_uid  AS propertyUid,
+ 			c.government_uid AS governmentUid,
+			c.name,
+			c.province_id provinceId,
+			c.city_id cityId,
+			c.region_id regionId,
+			c.street,
+			c.area,
+			c.households,
+			c.maxBuildingNumber ,
+			c.maxCellNumber ,
+			c.singlebiggestnumber,
+			c.maxfoors,
+			c.address,
+			c.headPicture
+	 from community c
+ 	 where c.id=#{id}
+  </select>
+  
+  
+  <!-- 查找业委会负责的小区 待审核的议题 -->
+  <select id="findAuthorizedIssues" parameterType="com.sikaokeji.owner.framework.domain.Issue" resultType="com.sikaokeji.owner.framework.domain.Issue">
+  	select i.id,i.name,i.ct,i.originator_uid as originatorUid,
+ 		   i.status
+ 	from issue i  	
+ 	<where>
+ 		<if test="communityId!=null and communityId!=''">
+ 			 i.community_id = #{communityId}
+ 		</if>
+ 		<if test="status!=null">
+ 			and i.status = #{status}
+ 		</if> 	
+ 		<if test="buildingNo != null">
+	    	and i.building_no = #{buildingNo}
+	    </if>
+	    <if test="type != null">
+	    	and i.type = #{type}
+	    </if>   
+ 	</where>
+ 	 <if test="1==1">
+    	order by ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>
+  
+  </select>
+  
+  <!-- 查找业委会审核通过的议题 列表-->
+  <select id="findAuditedIssue" parameterType="com.sikaokeji.owner.framework.domain.Issue" resultType="com.sikaokeji.owner.framework.domain.Issue" >
+	select   i.id,i.name,i.ct,i.originator_uid as originatorUid,
+ 		   i.status
+ 	from issue i   	
+ 	where 
+ 		i.id in(select SERVICE_ID 
+ 				from c_work c
+ 				where c.UID = #{auditUid}
+ 				and c.type = #{auditType}
+ 				and c.STATUS = #{auditStatus}
+ 				)
+  	<if test="buildingNo != null">
+	    	and i.building_no = #{buildingNo}
+    </if>
+    <if test="type != null">
+    	and i.type = #{type}
+    </if>   
+  	order by i.ct desc
+  	<if test="pageNum != null">
+  		limit #{pageNum},#{pageSize}
+  	</if>
+  
+  </select>
+  
+  <!-- 查找审核未通过的议题详情 -->
+  <select id="findNoAuditIssue" parameterType="com.sikaokeji.owner.framework.domain.Issue"  resultType="com.sikaokeji.owner.framework.domain.Issue">
+  	select i.id,i.name,i.ct,i.originator_uid as originatorUid,
+  		   i.content,i.money,i.work_end_time as workEndTime,i.WORK_DAY_NUM_TYPE  as workDayNumType, i.DAY_NUM as dayNum, 
+ 		   i.status ,c.status as auditStatus,c.OPINION as auditOpinion,
+ 		   c.uid as auditUid,c.ct as auditTime,fp.uid
+ 	from issue i  	
+ 	left join c_work c on i.id = c.SERVICE_ID
+ 	left join follow_person fp  on i.id=fp.issueid
+ 	where  i.id = #{id}
+ 	and c.type = #{auditType}  
+ 	and c.UID = #{auditUid}
+  </select>
+  
+  
+  <!-- 查找小区待审核的业主 列表-->
+  <select id="findToAuditOwner" parameterType="com.sikaokeji.owner.framework.domain.Owner" resultType="com.sikaokeji.owner.framework.domain.Owner">
+  	select id,uid,headPicture,ct,name,mobile,address,COMMUNITY_NAME as communityName,
+  			BUILDING_NO as buildingNo,ROOM_NO as roomNo,status
+  	from ${tableName}    
+  	<where>
+  		<if test="1==1">
+  			status = #{status}
+  		</if>  		
+  		<if test="communityId != null">
+  			and COMMUNITY_ID = #{communityId}
+  		</if>
+  	</where>		
+  		<if test="1==1">
+    		order by ct desc
+   		 </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>
+  </select>  
+  
+  <!-- 查找业委会审核过的业主列表 -->
+  <select id="findAlsoAuditedOwner" parameterType="com.sikaokeji.owner.framework.domain.Owner" resultType="com.sikaokeji.owner.framework.domain.Owner">
+  	select id,uid,headPicture,ct,name,mobile,address,COMMUNITY_NAME as communityName,
+  			BUILDING_NO as buildingNo,ROOM_NO as roomNo,status
+  	from ${tableName}    
+  	<where>
+  		<if test="1==1">
+  			status = #{status}
+  		</if>  		
+  		<if test="communityId != null">
+  			and COMMUNITY_ID = #{communityId}
+  		</if>
+  		<if test="1==1">
+  			and uid in (	select SERVICE_ID 
+		 				from c_work c
+		 				where c.UID = #{owners_uid}
+		 				and c.type = #{auditType}
+		 				and c.STATUS = #{auditStatus}  				
+  			)
+  		</if>
+  	</where>		
+  		<if test="1 == 1">
+    		order by ct desc
+   		 </if>
+    <if test="pageNum != null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>
+  </select>
+  
+  <!-- 新增一条 集资 或募捐 -->
+  <insert id="addRaiseDonation"  useGeneratedKeys="true" keyProperty="id"   parameterType="com.sikaokeji.owner.framework.domain.RaiseDonation"  >
+    insert into raise_donations ( uid, title, 
+      content, amount, type, 
+      ct, endtime)
+    values (#{uid,jdbcType=BIGINT}, #{title,jdbcType=VARCHAR}, 
+      #{content,jdbcType=VARCHAR}, #{amount,jdbcType=DECIMAL}, #{type,jdbcType=INTEGER}, 
+      #{ct,jdbcType=BIGINT}, #{endtime,jdbcType=BIGINT}  )
+  </insert>
+  
+  <!-- 业委会查找自己的公示列表 -->
+  <select id="findOwenrSignmesage" parameterType="com.sikaokeji.owner.framework.domain.SignMessage" resultType="com.sikaokeji.owner.framework.domain.SignMessage">
+	  select s.id, s.title,s.start_time,s.CONTENT as content,s.end_time,s.ct
+	 	from sign_message s 	
+	 	<where> 		
+	 		<if test="plan_type!=null and plan_type!=''">
+	 			and s.t_plan_type = #{plan_type}
+	 		</if> 		
+	 		<if test="uid!=null and uid!=''">
+	 			and uid = #{uid}
+	 		</if>
+	 		<if test="end_time!=null and end_time!=''">
+	 			 and s.end_time &gt;= #{end_time}		
+	 		</if>
+	 		<if test="isdel!=null and isdel!=''">
+	 			and s.isdel = #{isdel}
+	 		</if>
+	 	</where>
+	 	<if test="1==1">
+		    order by s.ct desc
+	    </if>   
+	    <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>   
+ </select>
+
+ <!-- 查找业委会发的议题列表 -->
+ <select id="findOwnerComiteeIssue" parameterType="com.sikaokeji.owner.framework.domain.Issue" resultType="com.sikaokeji.owner.framework.domain.Issue">
+ 	select i.id,i.name,i.ct,ORIGINATOR_UID as  originatorUid,
+ 		   i.against_num as against_num,i.AGREE_NUM as agreeNum,
+ 		   i.status,i.VOTE_END_TIME  as voteEndTime,community_id as communityId
+ 	from issue i 	
+ 	<where>
+ 		<if test="status != null">
+ 			status = #{status}
+ 		</if>
+ 		<if test="issueTypeId != null">
+ 			and ISSUE_TYPE_ID = #{issueTypeId}
+ 		</if>
+ 		<if test="communityId != null">
+ 			and community_id = #{communityId}
+ 		</if>
+ 		<if test="name !=null and name !=''">
+ 			and name like CONCAT('%','${name}','%')
+ 		</if>
+ 		<if test="originatorUid != null">
+ 			and ORIGINATOR_UID = #{originatorUid}
+ 		</if>
+ 		<if test="type != null">
+ 			and type = #{type}
+ 		</if>
+ 		<if test="buildingNo != null">
+	    	and i.building_no = #{buildingNo}
+	    </if>	    
+ 	</where>
+ 	<if test="1==1">
+	    order by i.ct desc
+    </if>   
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>   
+ </select>
+ 
+ <!-- 查找业委会的授权委托列表 --> 
+  <select id="findAuthorize" parameterType="com.sikaokeji.owner.framework.domain.Authorize" resultType="com.sikaokeji.owner.framework.domain.Authorize">
+  	select ID,AUTHORIZE_UID as authorizeUid,AUTHORIZED_UID as authorizedUid, type, 		   
+  		   status,ct,END_TIME as endTime
+  	from authorize
+  	<where>
+  		<if test="authorizeUid!=null and authorizeUid!=''">
+  			AUTHORIZE_UID = #{authorizeUid}
+  		</if>
+  		<if test="authorizedUid!=null and authorizedUid!= ''">
+  			and AUTHORIZED_UID = #{authorizedUid}
+  		</if>
+  		<if test="type !=null ">
+  			and type = #{type}
+  		</if>
+  		<if test="status!=null">
+  			and status = #{status}
+  		</if>
+  		<if test="endTime!=null and endTime!=''">
+  			and END_TIME &gt;= #{endTime}
+  		</if>
+  		<if test="isdel!=null">
+  			and ISDEL = #{isdel}
+  		</if>  		
+  	</where>	   
+  	<if test="1==1">
+    	order by ct desc
+    </if>
+    <if test="pageNum!=null ">
+    	 limit #{pageNum},#{pageSize}
+    </if>  
+  </select>
+  
+  <!-- 查看授权详情 -->
+  <select id="findAuthorizeDetail" parameterType="com.sikaokeji.owner.framework.domain.Authorize" resultType="com.sikaokeji.owner.framework.domain.Authorize" >
+	select a.ID,a.AUTHORIZE_UID as authorizeUid,a.AUTHORIZED_UID as  authorizedUid, a.type,
+		   a.status,a.ct,a.END_TIME as endTime,a.protocol_file AS protocolFile,
+		   a.et,c.OPINION as content
+	from authorize a 
+	left join c_work c on a.id = c.SERVICE_ID
+	where a.id = #{id}
+  </select>    
+  
+  <!-- 查找业委会是否有权利审核业主 和议题 -->
+  <select id="findAuthorise" parameterType="com.sikaokeji.owner.framework.domain.Authorize" resultType="com.sikaokeji.owner.framework.domain.Authorize">
+  	select id 
+  	from authorize
+  	where authorize_uid = #{authorizeUid}  
+  	and type = #{type}
+  	and STATUS = #{status}
+  	and END_TIME &gt;= #{endTime}
+  	and isdel = 0  	
+  </select>
+  
+  
+  <!-- 根据业委会id 查找小区id -->
+  <select id="findCommunityId" parameterType="com.sikaokeji.owner.framework.domain.Community" resultType="com.sikaokeji.owner.framework.domain.Community">
+  	select id from community
+  	where OWNERS_UID = #{ownersUid}
+  </select>
+  
+  <!-- 审核业主之前判断律师是否有权限 去审核   (查看业主所在的小区是否有业委会) 此sql 没用-->
+  <select id="findIfHaveOwners" parameterType="com.sikaokeji.owner.framework.domain.Owner" resultType="com.sikaokeji.owner.framework.domain.Owner">
+  	select o.id,o.uid,c.owners_uid 
+  	from ${tableName}  o
+  	left join community c on o.COMMUNITY_ID=c.id
+  	where o.uid = #{uid}
+  </select>
+  
+   <!--查看 业务会是否把审核业主的权利 成功授权给律师    此sql 没用-->
+  <select id="findIfHaveAudit" parameterType="com.sikaokeji.owner.framework.domain.Authorize" resultType="com.sikaokeji.owner.framework.domain.Authorize">
+  	select auditId,issue_id,id
+  	from authorize  	
+  	<where>
+  		<if test="type!=null">
+  			type = #{type}
+  		</if>
+  		<if test="status!=null">
+  			and STATUS = #{status}
+  		</if>
+  		<if test="authorizedUid!=null and authorizedUid!=''">
+  			and authorized_uid = #{authorizedUid}  
+  		</if>
+  		<if test="authorizeUid!=null and authorizeUid!=''">
+  			and AUTHORIZE_UID = #{authorizeUid}	
+  		</if>
+  		<if test="issue_id!=null and issue_id!=''">
+  			and issue_id = #{issue_id}
+  		</if>
+  		<if test="endTime!=null and endTime!=''">
+  			and END_TIME &gt;=#{endTime}  		
+  		</if>
+  	</where>
+  </select>
+  
+  
+  
+  
+  
+  
+</mapper>

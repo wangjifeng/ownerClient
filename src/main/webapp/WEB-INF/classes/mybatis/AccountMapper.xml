@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.AccountDAO" >
+
+	<!-- 初始化接口  查找下拉列表-->
+	<select id="findJheyuz" parameterType="com.sikaokeji.owner.framework.domain.Jiheyz" resultType="com.sikaokeji.owner.framework.domain.Jiheyz">
+		select bianma,name,type,isdel,pid
+		from jiheyuz
+		<where>
+			<if test="pid!=null and pid!=''">
+				pid=#{pid}
+			</if>
+		</where>
+	</select>
+	  <!-- 查询支付账户详情 -->
+	  <select id="getAccount" resultType="com.sikaokeji.owner.framework.domain.Account" parameterType="com.sikaokeji.owner.framework.domain.Account">
+	    select 
+			id,uid,amount,password,type,ct,et,isdel,residualAmount,raiseAmount,donationAmount
+	    from 
+	        account
+	    where
+		    <if test="uid != null and uid != ''">
+		        uid = #{uid}
+	    	</if>
+	    	
+	    	<if test="type != null and type != ''">
+		        AND type = #{type}
+	    	</if>
+	    	
+	    	<if test="password != null and password != ''">
+		        AND password = #{password}
+	    	</if>
+	    for update		
+	  </select>
+	  
+	  <!-- 修改账户信息 -->
+	  <update id="editAccount" parameterType="com.sikaokeji.owner.framework.domain.Account" >
+	    update account
+	    set 
+	      <if test="amount != null">
+		        amount = #{amount},
+	      </if>
+	      <if test="password != null and password != ''">
+		        password = #{password},
+	      </if>
+	      et = #{et}
+	    where 
+	      1 = 1
+	      <if test="id != null and id != ''">
+		       AND id = #{id}
+	      </if>
+	      <if test="uid != null and uid != ''">
+		       AND uid = #{uid}
+	      </if>
+	      
+	  </update>
+	  
+	  <!-- 添加角色 -->
+	  <insert id="addRole" parameterType="com.sikaokeji.owner.framework.domain.CRole">
+	  	insert into c_role (UID,ROLE_ID,CT)
+	  			values (#{uid},#{roleId},#{ct})
+	  </insert>
+	  <!-- 添加记录 -->
+	  <insert id="addAccountDetail" parameterType="com.sikaokeji.owner.framework.domain.AccountDetail" >
+	    insert into account_detail (purpose,pay_order_id,account_pay_id,account_id, type,flow_amount,account_balance,status,ct,is_examine)
+	    values (#{purpose},#{payOrderId},#{accountPayId},#{accountId},#{type},#{flowAmount},#{accountBalance},#{status},#{ct},#{examineStauts})
+	  </insert>
+	  
+	  <!-- 更新支付状态  -->
+	  <update id="eidtAccountDetail" parameterType="com.sikaokeji.owner.framework.domain.AccountDetail">
+	  	update 
+	  		  account_detail 
+	  	set 
+	  	  	  status = #{status}
+	  	  	  <if test="examineStauts != null ">
+	  	  	  	,is_examine = #{examineStauts}
+	  	  	  </if>
+	  	where 
+	  		1 = 1
+	  		<if test="id != null and id != ''">
+	  	      AND id = #{id}
+	  		</if>
+	  		<if test="payOrderId != null and payOrderId != ''">
+	  	      AND pay_order_id = #{payOrderId}
+	  		</if>
+	  </update>  
+	  
+	  <!-- 新增支付账户  -->
+	  <insert id="addAccount" parameterType="com.sikaokeji.owner.framework.domain.Account" keyProperty="id">
+	    insert into account ( uid, type, ct)
+	    values (#{uid},#{type},#{ct})
+	  </insert>
+	  
+	  <!--查看用户的支付明细列表  -->
+	  <select id="findAccountDetailListOLD" parameterType="com.sikaokeji.owner.framework.domain.AccountDetail" resultType="com.sikaokeji.owner.framework.domain.AccountDetail">
+	  	select ad.ID,pay_order_id AS payOrderId,ACCOUNT_PAY_ID AS accountPayId,account_id AS accountId,ad.type,flow_amount as flowAmount,account_balance AS accountBalance,purpose,ct
+	  	from account_detail ad
+	  	left join account a on ad.account_id = a.id
+	    left join account ac on ad.account_pay_id = ac.id
+	    <where>
+	    	<if test="uid!=null and uid!=''">
+	    		a.uid = #{uid}
+	    	</if>
+	    	<if test="purpose!=null and purpose!=''">
+	    		AND ad.purpose = #{purpose}
+	    	</if>
+	    	<if test="type!=null and purpose!=''">
+	    		AND ad.type = #{type} 
+	    	</if>
+	    	<if test="status!=null ">
+	    		 AND ad.status = #{status}
+	    	</if>
+	    	<if test="examineStauts!=null and examineStauts!=''">
+	    		AND ad.examine_stauts = #{examineStauts}
+	    	</if>
+	    </where>
+	    <if test="1==1">
+	    	order by ct desc
+	    </if>
+	    <if test="pageNum!=null">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>
+	  
+	  </select>
+	  <!-- 查看用户的收支明细列表 -->
+	  <select id="findAccountDetailList" parameterType="com.sikaokeji.owner.framework.domain.AccountDetail" resultType="com.sikaokeji.owner.framework.domain.AccountDetail">
+		  select a.* from (
+		  	select id,FLOW_AMOUNT as flowAmount, ct,type,PURPOSE as purpose
+		  	from account_detail	  
+		  	<where>
+		  		<if test="accountPayId!=null and accountPayId!=''">
+		  			account_pay_id = (select id from account where uid = #{accountPayId})
+		  		</if>	  		
+		  		<if test="1==1">
+		  			and type = 1
+		  		</if>
+		  		<if test="uid != null">
+		  			and account_pay_id = (select id from account where uid = #{uid})
+		  		</if>
+		  		<if test="purpose!=null and purpose!=''">
+		    		AND purpose = #{purpose}
+		    	</if>	    	
+		    	<if test="status!=null ">
+		    		 AND status = #{status}
+		    	</if>
+		    	<if test="examineStauts!=null and examineStauts!=''">
+		    		AND is_examine = #{examineStauts}
+		    	</if>
+		    	<if test="1==1">
+		    		and checked = 1
+		    	</if>
+		  	</where>	
+		  	union 
+		  	select id,FLOW_AMOUNT as flowAmount, ct,type,PURPOSE as purpose
+		  	from account_detail	  
+		  	<where>	  		
+		  		<if test="accountId!=null and accountId!=''">
+		  			 account_id =  (select id from account where uid = #{accountId})
+		  		</if>
+		  		<if test="uid != null">
+		    		and  account_id =  (select id from account where uid = #{uid})
+		    	</if>
+		  		<if test="1==1">
+		  			and type = 2
+		  		</if>
+		  		<if test="purpose!=null and purpose!=''">
+		    		AND purpose = #{purpose}
+		    	</if>
+		    	<if test="type!=null and purpose!=''">
+		    		AND type = #{type} 
+		    	</if>	    	
+		    	<if test="status!=null">
+		    		 AND status = #{status}
+		    	</if>
+		    	<if test="examineStauts!=null and examineStauts!=''">
+		    		AND is_examine = #{examineStauts}
+		    	</if>
+		    	<if test="1==1">
+		    		and checked = 1
+		    	</if>
+		  	</where>	
+		  	)a
+		   order by a.ct desc
+		   <if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	  	   </if>
+		  	  	
+	  </select>
+	  <!--查看用户的支付明细 -->
+	  <select id="findAccountDetail" parameterType="com.sikaokeji.owner.framework.domain.AccountDetail" resultType="com.sikaokeji.owner.framework.domain.AccountDetail">
+	  	select ID,pay_order_id AS payOrderId,ACCOUNT_PAY_ID AS accountPayId,account_id AS accountId,type,flow_amount as flowAmount,account_balance AS accountBalance,purpose,ct
+	  	from account_detail
+	  	<where>
+	  		<if test="id!=null and id!=''">
+	  			id=#{id}
+	  		</if>
+	  	</where>
+	  </select>
+	  
+	  <!-- 查找业委会在指定时间内从小区账户转账的额度 -->
+	  <select id="findCountAmount" parameterType="com.sikaokeji.owner.framework.domain.AccountDetail" resultType="bigdecimal">
+	  	select sum(FLOW_AMOUNT) 
+	  	from account_detail
+	  	where ACCOUNT_ID = #{accountId}
+	  	and purpose in (${purposes}) 
+	  	and type = #{type}
+	  	and ct &gt;= #{ct}
+	  	and isdel = 0
+	  </select>
+	  
+	  <!-- 新增用户账号 -->
+	  <insert id="addAccountNumber" parameterType="com.sikaokeji.owner.framework.domain.AccountNumber" >
+	    insert into account_number ( uid, cardnumber, 
+	     			 cardname, type, banktype, 
+	    			  ct)
+	    values ( #{uid,jdbcType=BIGINT}, #{cardnumber,jdbcType=VARCHAR}, 
+		      #{cardname,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{banktype,jdbcType=INTEGER}, 
+		      #{ct,jdbcType=BIGINT})
+	  </insert>
+	  <!-- 新增账户判断 账户 是否存在-->
+	  <select id="findIfExist" parameterType="com.sikaokeji.owner.framework.domain.AccountNumber" resultType="com.sikaokeji.owner.framework.domain.AccountNumber">
+	  	select id
+	  	from account_number
+	  	<where>
+	  		<if test="1 == 1">
+	  			uid = #{uid}
+	  		</if>	  		
+	  		<if test="type != null">
+	  			and type = #{type}
+	  		</if>
+	  		<if test="banktype != null">
+	  			and banktype = #{banktype}
+	  		</if>
+	  		and isdel = 0
+	  	</where>	  	
+	  </select>
+	  <!-- 用户查找账号 -->
+	  <select id="findAccoutNumber" parameterType="com.sikaokeji.owner.framework.domain.AccountNumber" resultType="com.sikaokeji.owner.framework.domain.AccountNumber" >
+	  	select id,uid, cardnumber, cardname, type, banktype, isdel, ct
+	  	from account_number
+	  	where uid = #{uid}
+	  	and isdel = 0
+	  </select>
+	  
+	  <!-- 查找用户的支付宝账号 -->
+	  <select id="findAccout" parameterType="com.sikaokeji.owner.framework.domain.AccountNumber" resultType="com.sikaokeji.owner.framework.domain.AccountNumber" >
+	  	select id,uid, cardnumber, cardname, type, banktype, isdel, ct
+	  	from account_number
+	  	where uid = #{uid}
+	  	and isdel = 0
+	  	and type = #{type}
+	  </select>
+	  <!-- 修改支付宝账号 -->
+	  <update id="updateAccountNumber" parameterType="com.sikaokeji.owner.framework.domain.AccountNumber">
+	  	update account_number
+	  	set isdel = 1,
+	  		et = #{et}
+	  	where id = #{id}
+	  	and uid = #{uid}		  		
+	  </update>
+	  
+	  <!-- 用户提现  -->
+	<insert id="addAccouontOutFlow" parameterType="com.sikaokeji.owner.framework.domain.AccountOutFlow" >
+    insert into account_outflow (ordernumber, uid, 
+      cardnumber, cardname, amount, 
+      sort, type, banktype, 
+      status, 
+      batchno, ct,community_ids      
+     )
+    values (#{ordernumber,jdbcType=VARCHAR}, #{uid,jdbcType=BIGINT}, 
+      #{cardnumber,jdbcType=VARCHAR}, #{cardname,jdbcType=VARCHAR}, #{amount,jdbcType=DECIMAL}, 
+      #{sort,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{banktype,jdbcType=INTEGER}, 
+      #{status,jdbcType=INTEGER},
+      #{batchno,jdbcType=VARCHAR}, #{ct,jdbcType=BIGINT},#{community_ids}
+     )
+  </insert>	  
+	  
+	  
+</mapper>

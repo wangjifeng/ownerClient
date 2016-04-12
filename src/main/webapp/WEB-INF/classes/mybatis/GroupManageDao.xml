@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sikaokeji.owner.framework.dao.GroupManageDAO" >
+
+	<!-- 根据群号获取群成员 -->
+	<select id="findGroupByTribeId" parameterType="com.sikaokeji.owner.framework.domain.Floor" resultType="com.sikaokeji.owner.framework.domain.Floor">
+		select a.* from (
+			select id,owner_id as ownerId
+			from floor
+			where tribe_id = #{tribeId}	
+			and isdel = 0
+			AND owner_id IS NOT NULL
+			union
+			select id,owner_id as ownerId
+			from floor_manager_group
+			where tribe_id = #{tribeId}	
+			and isdel = 0
+			AND owner_id IS NOT NULL
+		)a
+		<if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>
+	</select>
+	
+	<!--根据小区id  律师id 获取律师所在的群列表   order by building_no-->
+	<select id="findLawyerGroup" parameterType="com.sikaokeji.owner.framework.domain.Floor" resultType="com.sikaokeji.owner.framework.domain.Floor">
+		select a.* from(
+			select id,tribe_name as tribeName,tribe_id as tribeId,tribe_notice as tribeNotice,building_no
+			from floor
+			where community_id = #{communityId}
+			and owner_id = #{ownerId}	
+			union 
+			select id,tribe_name as tribeName,tribe_id as tribeId,tribe_notice as tribeNotice,building_no
+			from floor_manager_group
+			where community_id = #{communityId}
+			and owner_id = #{ownerId}	
+		)a	
+		order by a.building_no
+		<if test="pageNum!=null ">
+	    	 limit #{pageNum},#{pageSize}
+	    </if>
+	</select>
+</mapper>
